@@ -1831,7 +1831,8 @@
         if (nodes.length < 10) return;
         const spawnPool = nodes.filter(p => distanceMeters(startCenter, { lat: p.lat, lng: p.lng }) > Math.min(90, radiusMeters() * .2));
         const pool = spawnPool.length ? spawnPool : nodes;
-        for (let i = 0; i < 4; i++) {
+        const ghostCount = radiusKm <= 1 ? 4 : radiusKm <= 2 ? 8 : 12;
+        for (let i = 0; i < ghostCount; i++) {
           let node = pool[Math.floor(Math.random() * pool.length)];
           const options = [...(graph.adj.get(node.key) || [])].filter(k => graph.nodes.has(k));
           if (!options.length) continue;
