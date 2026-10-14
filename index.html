@@ -1176,6 +1176,7 @@
       const STREET_CACHE_STORE = 'street-data';
       const STREET_CACHE_VERSION = 1;
       const STREET_CACHE_MAX_AGE_MONTHS = 3;
+      const STREET_CACHE_REUSE_MARGIN_M = 100;
       const COIN_INTERSECTION_CLEARANCE_M = INTERSECTION_PAUSE_M + 5;
       const COIN_WALKWAY_HIGHWAYS = new Set(['footway', 'path', 'pedestrian', 'steps']);
       const VEHICLE_ROAD_HIGHWAYS = new Set(['primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'unclassified', 'residential', 'living_street', 'service', 'track', 'road']);
@@ -1575,10 +1576,14 @@
         }));
       }
       async function fetchStreetWays(center, radius) {
-        const queryRadius = Math.ceil(radius + 40);
+        const requiredRadius = Math.ceil(radius);
+        const queryRadius = requiredRadius + 40 + STREET_CACHE_REUSE_MARGIN_M;
         try {
-          const cached = await findCachedStreetWays(center, queryRadius);
-          if (cached) return { ways: cached.ways, crossings: cached.crossings, fromCache: true };
+          const cached = await findCachedStreetWays(center, requiredRadius);
+          if (cached) {
+            console.info('Street Pac: using cached street data from', new Date(cached.savedAt).toISOString());
+            return { ways: cached.ways, crossings: cached.crossings, fromCache: true };
+          }
         } catch (error) {
           console.warn('Street Pac: could not read local street-data cache; fetching from Overpass:', error);
         }
