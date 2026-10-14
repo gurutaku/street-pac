@@ -59,11 +59,16 @@
     .btn-secondary { color:var(--text); background:#233251; border:1px solid rgba(255,255,255,.11); }
     .btn-danger { color:white; background:#b63054; }
     .btn-small { min-height:38px; font-size:12px; padding:9px 12px; }
-    .welcome { position:absolute; z-index:600; top:50%; left:16px; right:16px; transform:translateY(-50%); max-width:440px; margin:auto; padding:22px; border:1px solid rgba(255,255,255,.14); border-radius:26px; background:rgba(13,21,40,.97); box-shadow:0 20px 70px #0007; }
+    /* The welcome panel is a fixed-height flex column. Only its options scroll;
+       the start action lives in a separate footer and therefore stays visible. */
+    .welcome { position:fixed; z-index:600; top:calc(env(safe-area-inset-top, 0px) + 72px); bottom:calc(112px + var(--safe-bottom)); left:12px; right:12px; width:auto; max-width:440px; max-height:none; display:flex; flex-direction:column; overflow:hidden; overscroll-behavior:contain; margin:0 auto; padding:0; border:1px solid rgba(255,255,255,.14); border-radius:24px; background:rgba(13,21,40,.99); box-shadow:0 20px 70px #0007; }
+    .welcome.hidden { display:none; }
+    .welcome-scroll { flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; padding:20px 20px 12px; scrollbar-width:thin; }
+    .welcome-footer { position:relative; z-index:2; flex:0 0 auto; padding:10px 16px 12px; padding-bottom:calc(12px + env(safe-area-inset-bottom, 0px)); background:#0d1528; border-top:1px solid rgba(255,255,255,.1); box-shadow:0 -8px 18px rgba(0,0,0,.18); }
     .welcome.hidden { display:none; }
     .eyebrow { color:var(--mint); font-size:11px; font-weight:900; letter-spacing:1.2px; text-transform:uppercase; }
     h1 { margin:7px 0 8px; font-size:28px; line-height:1.05; letter-spacing:-1px; }
-    .welcome-copy { margin:0 0 16px; font-size:13px; line-height:1.5; color:var(--muted); }
+    .welcome-copy { margin:0 0 14px; font-size:13px; line-height:1.45; color:var(--muted); }
     .field-label { display:block; color:#dce4f8; font-weight:800; font-size:12px; margin:14px 0 8px; }
     .radius-line { display:flex; align-items:center; gap:12px; }
     input[type=range] { width:100%; accent-color:var(--yellow); }
@@ -73,7 +78,11 @@
     .character[aria-pressed="true"] { border:2px solid var(--yellow); background:#433d27; box-shadow:0 0 0 2px #ffd44721; }
     .mini-note { color:#aab8d2; font-size:10px; line-height:1.45; margin-top:12px; }
     .mini-note strong { color:#ffdf71; }
-    .wide { width:100%; margin-top:16px; }
+    .wide { width:100%; margin-top:12px; }
+    .welcome-footer .wide { min-height:48px; margin:0; padding:11px 12px; font-size:14px; white-space:normal; line-height:1.2; }
+    .welcome-footer .footer-note { margin-top:5px; }
+    .start-error { margin:0 0 8px; padding:9px 10px; border:1px solid #a94e62; border-radius:11px; color:#ffd7df; background:#431e30; font-size:11px; line-height:1.35; }
+    .start-error.hidden { display:none; }
     .banner { z-index:650; position:absolute; top:128px; left:12px; right:12px; max-width:520px; margin:auto; display:flex; align-items:flex-start; gap:10px; padding:12px 14px; border-radius:16px; background:rgba(58,46,15,.97); border:1px solid #a98c3c; box-shadow:0 8px 25px #0003; }
     .banner.hidden { display:none; }
     .banner-icon { font-size:20px; line-height:1; }
@@ -106,15 +115,38 @@
       .dock-actions { max-width:450px; margin-left:auto; }
       .status-row { position:absolute; left:22px; bottom:27px; max-width:50%; margin:0; }
       .footer-note { display:none; }
-      .welcome { top:54%; }
+      .welcome { top:calc(env(safe-area-inset-top, 0px) + 82px); bottom:calc(118px + var(--safe-bottom)); }
+      .welcome-scroll { padding:20px 20px 12px; }
+      .welcome-footer { padding-inline:16px; }
     }
     @media (max-height:680px) {
-      .welcome { padding:16px; }
-      h1 { font-size:24px; }
-      .field-label { margin-top:10px; }
-      .character { min-height:39px; }
-      .mini-note { margin-top:8px; }
-      .wide { margin-top:10px; }
+      .welcome { top:calc(env(safe-area-inset-top, 0px) + 64px); bottom:calc(108px + var(--safe-bottom)); border-radius:20px; }
+      .welcome-scroll { padding:13px 16px 8px; }
+      .welcome-footer { padding:8px 12px 9px; padding-bottom:calc(9px + env(safe-area-inset-bottom, 0px)); }
+      h1 { font-size:23px; margin:5px 0 6px; }
+      .welcome-copy { margin-bottom:9px; font-size:12px; }
+      .field-label { margin-top:8px; margin-bottom:6px; }
+      .character { min-height:36px; font-size:23px; }
+      .characters { gap:5px; }
+      .mini-note { margin-top:7px; font-size:9px; }
+      .welcome-footer .wide { min-height:44px; font-size:13px; }
+      .welcome-footer .footer-note { display:none; }
+    }
+    @media (max-height:500px) {
+      .welcome { top:calc(env(safe-area-inset-top, 0px) + 54px); bottom:calc(104px + var(--safe-bottom)); left:8px; right:8px; border-radius:16px; }
+      .welcome-scroll { padding:10px 13px 6px; }
+      .welcome-footer { padding:6px 10px 7px; }
+      h1 { font-size:20px; }
+      .welcome-copy { font-size:11px; line-height:1.3; margin-bottom:6px; }
+      .character { min-height:31px; font-size:20px; border-radius:9px; }
+      .mini-note { display:none; }
+      .field-label { margin-top:6px; margin-bottom:4px; }
+      .welcome-footer .wide { min-height:42px; padding:9px; }
+    }
+    @media (max-width:360px) {
+      .welcome-scroll { padding-inline:13px; }
+      .welcome-footer .wide { font-size:12px; }
+      .characters { gap:4px; }
     }
   </style>
 </head>
@@ -137,10 +169,11 @@
     <div class="banner-icon" id="bannerIcon">⚠️</div>
     <div><div class="banner-title" id="bannerTitle">Game paused for safety</div><div class="banner-copy" id="bannerCopy">Look up and cross safely. Gameplay will resume when you are clear.</div></div>
   </div>
-  <section id="welcome" class="welcome">
-    <div class="eyebrow">Walk • Explore • Collect</div>
-    <h1>Your streets.<br>Your arcade.</h1>
-    <p class="welcome-copy">Head outside, follow your GPS marker, collect golden coins on nearby streets, and watch out for wandering ghosts.</p>
+  <section id="welcome" class="welcome" aria-label="Game setup">
+    <div class="welcome-scroll">
+      <div class="eyebrow">Walk • Explore • Collect</div>
+      <h1>Your streets.<br>Your arcade.</h1>
+      <p class="welcome-copy">Head outside, follow your GPS marker, collect golden coins on nearby streets, and watch out for wandering ghosts.</p>
     <label class="field-label" for="radiusRange">Coin zone radius</label>
     <div class="radius-line"><input id="radiusRange" type="range" min="1" max="3" step="0.5" value="1.5" aria-label="Coin zone radius in kilometres"><div class="radius-value" id="radiusValue">1.5 km</div></div>
     <div class="field-label">Choose your character</div>
@@ -152,9 +185,13 @@
       <button class="character" type="button" data-character="🤖" aria-label="Robot" aria-pressed="false">🤖</button>
       <button class="character" type="button" data-character="🐼" aria-label="Panda" aria-pressed="false">🐼</button>
     </div>
-    <div class="mini-note"><strong>Safety first:</strong> Street-intersection pauses are best-effort only. GPS can lag or jump. Always stop, look up, and cross safely; never watch the screen while crossing.</div>
-    <button id="startButton" class="btn btn-primary wide" type="button">📍 Find me &amp; start</button>
-    <div class="footer-note">Location permission is only requested when you start.</div>
+      <div class="mini-note"><strong>Safety first:</strong> Street-intersection pauses are best-effort only. GPS can lag or jump. Always stop, look up, and cross safely; never watch the screen while crossing.</div>
+    </div>
+    <div class="welcome-footer">
+      <div id="startError" class="start-error hidden" role="alert" aria-live="assertive"></div>
+      <button id="startButton" class="btn btn-primary wide" type="button">▶ START GAME</button>
+      <div class="footer-note">Location permission is only requested when you start.</div>
+    </div>
   </section>
   <div class="bottom-dock">
     <div class="status-row"><span class="status-dot" id="statusDot"></span><span id="statusText">Choose your character, then start when you're outdoors.</span></div>
@@ -191,10 +228,13 @@
   const COIN_PICKUP_BUFFER_M = 14;
   const INTERSECTION_PAUSE_M = 30;
   const INTERSECTION_RESUME_M = 40;
-  const HIGHWAY_RE = '^(residential|living_street|unclassified|tertiary|secondary|footway|path|pedestrian|cycleway|steps|service|track|bridleway)$';
+  // Keep the request focused on local walkable streets; avoid larger arterial roads.
+  const HIGHWAY_RE = '^(residential|living_street|unclassified|footway|path|pedestrian|cycleway|steps|service|track|bridleway)$';
+  // Public Overpass instances are community-operated and can be busy. Try independent instances.
   const OVERPASS_ENDPOINTS = [
     'https://overpass-api.de/api/interpreter',
-    'https://overpass.kumi.systems/api/interpreter'
+    'https://overpass.private.coffee/api/interpreter',
+    'https://z.overpass-api.de/api/interpreter'
   ];
   const GHOST_EMOJIS = ['👻', '👾', '💜', '👻'];
   const $ = id => document.getElementById(id);
@@ -355,27 +395,41 @@
   });
 
   async function fetchStreetWays(center, radius) {
-    const query = `[out:json][timeout:25];way(around:${Math.ceil(radius + 120)},${center.lat},${center.lng})["highway"~"${HIGHWAY_RE}"];out geom;`;
-    let lastError;
+    // `out geom qt` makes output ordering faster, and a smaller buffer reduces payload size.
+    const query = `[out:json][timeout:15];way(around:${Math.ceil(radius + 40)},${center.lat.toFixed(6)},${center.lng.toFixed(6)})["highway"~"${HIGHWAY_RE}"];out geom qt;`;
+    const failures = [];
     for (const endpoint of OVERPASS_ENDPOINTS) {
+      const controller = new AbortController();
+      let timeoutId = null;
       try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 30000);
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-          body: 'data=' + encodeURIComponent(query),
-          signal: controller.signal
+        // End each attempt promptly so a slow community endpoint cannot leave the UI stuck.
+        timeoutId = setTimeout(() => controller.abort(), 18000);
+        // GET avoids the POST preflight some browsers now receive as HTTP 406 from Overpass.
+        // This query is short enough to fit comfortably in a URL.
+        const response = await fetch(`${endpoint}?data=${encodeURIComponent(query)}`, {
+          method: 'GET',
+          signal: controller.signal,
+          cache: 'no-store'
         });
-        clearTimeout(timeout);
-        if (!response.ok) throw new Error(`Street data service returned ${response.status}.`);
+        if (!response.ok) {
+          // Read a small part of the body when available; some instances return a useful error.
+          let detail = '';
+          try { detail = (await response.text()).slice(0, 120).replace(/\s+/g, ' '); } catch (_) {}
+          throw new Error(`HTTP ${response.status}${detail ? `: ${detail}` : ''}`);
+        }
         const data = await response.json();
         const ways = (data.elements || []).filter(el => el.type === 'way' && Array.isArray(el.geometry) && el.geometry.length >= 2);
-        if (!ways.length) throw new Error('No suitable nearby streets were returned.');
+        if (!ways.length) throw new Error('No walkable streets were found nearby.');
         return ways;
-      } catch (error) { lastError = error; }
+      } catch (error) {
+        const reason = error?.name === 'AbortError' ? 'request timed out' : (error?.message || 'network error');
+        failures.push(`${new URL(endpoint).hostname}: ${reason}`);
+      } finally {
+        if (timeoutId !== null) clearTimeout(timeoutId);
+      }
     }
-    throw new Error(lastError?.message || 'Could not load nearby street data. Check your internet connection and try again.');
+    console.warn('Street Pac: all street data endpoints failed:', failures);
+    throw new Error('The street-map service did not respond in time. Check your internet connection and tap START GAME to retry. If it keeps happening, wait a little and try again.');
   }
   function osmPointKey(way, index, point) {
     const id = way.nodes && way.nodes[index];
@@ -641,6 +695,9 @@
   }
   async function startGame() {
     $('startButton').disabled = true;
+    $('startError').classList.add('hidden');
+    $('startError').textContent = '';
+    $('startButton').textContent = '⏳ LOADING…';
     appLocationError = '';
     setPhase('loading');
     setStatus('Requesting high-accuracy location…', 'warn');
@@ -680,6 +737,7 @@
       $('stopButton').disabled = false;
       $('centerButton').disabled = false;
       $('startButton').disabled = true;
+      $('startButton').textContent = '▶ START GAME';
       setPhase('playing');
       setStatus(`Quest live: ${coins.length} coins and ${ghostActors.length} ghosts. Eyes up while walking!`, 'live');
       if (intersections.length === 0) showBanner('Safety note: no intersections mapped', 'Street data did not identify intersections in this area. Never rely on auto-pause; stop and look up at every road crossing.', '⚠️');
@@ -698,6 +756,9 @@
       setStatus(appLocationError, 'danger');
       $('welcome').classList.remove('hidden');
       $('startButton').disabled = false;
+      $('startButton').textContent = '▶ START GAME';
+      $('startError').textContent = appLocationError;
+      $('startError').classList.remove('hidden');
       // Clear the watch if setup fails so we don't keep tracking without a running quest.
       if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
       clearActors();
@@ -731,6 +792,8 @@
     $('summary').classList.add('hidden');
     $('welcome').classList.remove('hidden');
     $('startButton').disabled = false;
+    $('startButton').textContent = '▶ START GAME';
+    $('startError').classList.add('hidden'); $('startError').textContent = '';
     $('stopButton').disabled = true; $('centerButton').disabled = true;
     $('coinStat').textContent = '🪙 0'; $('distanceStat').textContent = '0.00 km'; $('timeStat').textContent = '10:00';
     setPhase('ready'); map.setView([20,0],2);

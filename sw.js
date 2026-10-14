@@ -1,4 +1,4 @@
-const CACHE_NAME = 'street-pac-shell-v1';
+const CACHE_NAME = 'street-pac-shell-v5';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', event => {
