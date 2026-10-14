@@ -1228,7 +1228,7 @@
         const angle = heading === null || !nearest.closest
           ? null
           : Math.abs(((bearingDegrees(p, nearest.closest) - heading + 540) % 360) - 180);
-        const shouldWarn = angle !== null && angle > 90;
+        const shouldWarn = angle !== null && angle >= 60 && angle <= 120;
         if (shouldWarn && !jaywalkWarningActive) {
           showBanner('Please do not jaywalk!', 'The nearest mapped intersection is behind your current heading. Turn toward it and cross only at a safe, legal crossing. Heading and map data may be inaccurate.', '🚦', 'critical');
         } else if (!shouldWarn && jaywalkWarningActive) {
