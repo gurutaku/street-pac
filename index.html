@@ -39,11 +39,17 @@
     .brand-sub { color:var(--muted); font-size:11px; margin-top:4px; }
     .pill { font-size:11px; font-weight:800; color:#15203a; background:var(--mint); padding:7px 10px; border-radius:999px; white-space:nowrap; }
     .stats { position:absolute; z-index:500; top:72px; left:10px; right:10px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; pointer-events:none; }
+    .coin-guide { position:absolute; z-index:520; top:146px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:9px; width:max-content; max-width:calc(100% - 24px); padding:7px 13px 7px 8px; border:1px solid #ffd447b8; border-radius:999px; background:rgba(7,12,24,.97); box-shadow:0 5px 18px #0008; pointer-events:none; }
+    .coin-guide.hidden { display:none; }
+    .coin-guide-arrow { display:grid; place-items:center; width:42px; height:42px; flex:none; border:2px solid #fff2ad; border-radius:50%; color:#1b2232; background:var(--yellow); font-size:27px; font-weight:1000; line-height:1; text-shadow:0 1px #fff8; transform-origin:center; box-shadow:0 0 0 4px #ffd44722; }
+    .coin-guide-copy { min-width:0; }
+    .coin-guide-title { color:#ffdf71; font-size:10px; letter-spacing:.7px; font-weight:1000; text-transform:uppercase; }
+    .coin-guide-copy > div:last-child { color:#fff; font-size:12px; line-height:1.25; font-weight:800; overflow-wrap:anywhere; }
     .stat { min-width:0; border:1px solid rgba(255,255,255,.13); background:rgba(13,21,40,.94); backdrop-filter:blur(10px); border-radius:15px; padding:9px 10px; box-shadow:0 5px 22px #0002; }
     .stat-label { color:var(--muted); text-transform:uppercase; letter-spacing:.6px; font-size:9px; font-weight:800; }
     .stat-value { font-size:clamp(17px,4.6vw,22px); font-weight:900; letter-spacing:-.6px; margin-top:2px; font-variant-numeric:tabular-nums; white-space:nowrap; }
     #map { z-index:1; flex:1; min-height:0; width:100%; background:#17243a; }
-    .leaflet-container { font-family:inherit; background:#17243a; }
+    .leaflet-container { font-family:inherit; background:#17243a; touch-action:none; }
     .leaflet-control-attribution { font-size:10px !important; background:rgba(10,16,32,.78) !important; color:#d3dcf3 !important; }
     .leaflet-control-attribution a { color:#b7d9ff !important; }
     .leaflet-control-zoom a { background:#121b31 !important; color:white !important; border-color:#3b4965 !important; }
@@ -83,11 +89,20 @@
     .welcome-footer .footer-note { margin-top:5px; }
     .start-error { margin:0 0 8px; padding:9px 10px; border:1px solid #a94e62; border-radius:11px; color:#ffd7df; background:#431e30; font-size:11px; line-height:1.35; }
     .start-error.hidden { display:none; }
-    .banner { z-index:650; position:absolute; top:128px; left:12px; right:12px; max-width:520px; margin:auto; display:flex; align-items:flex-start; gap:10px; padding:12px 14px; border-radius:16px; background:rgba(58,46,15,.97); border:1px solid #a98c3c; box-shadow:0 8px 25px #0003; }
+    .banner { z-index:950; position:absolute; top:128px; left:12px; right:12px; max-width:520px; margin:auto; display:flex; align-items:flex-start; gap:10px; padding:12px 14px; border-radius:16px; background:rgba(58,46,15,.97); border:1px solid #a98c3c; box-shadow:0 8px 25px #0003; }
     .banner.hidden { display:none; }
     .banner-icon { font-size:20px; line-height:1; }
     .banner-title { font-size:13px; font-weight:900; color:#ffdf71; }
     .banner-copy { margin-top:3px; font-size:11px; line-height:1.35; color:#f3e7c4; }
+    /* A detected intersection blocks the entire map with a high-contrast stop message. */
+    .banner.safety-critical { position:fixed; inset:0; z-index:2000; width:100vw; height:100dvh; max-width:none; margin:0; padding:calc(24px + env(safe-area-inset-top, 0px)) 24px calc(24px + var(--safe-bottom)); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px; border:9px solid #ff263f; border-radius:0; background:#030303; box-shadow:none; text-align:center; }
+    .banner.safety-critical .banner-icon { font-size:clamp(48px, 13vw, 76px); }
+    .banner.safety-critical .banner-title { max-width:620px; color:#ff263f; font-size:clamp(29px, 7vw, 48px); line-height:1.02; font-weight:1000; text-transform:uppercase; letter-spacing:-.6px; }
+    .banner.safety-critical .banner-copy { max-width:560px; margin-top:0; color:#fff; font-size:clamp(17px, 4.2vw, 23px); line-height:1.42; font-weight:800; }
+    .summary-card.summary-danger { border:6px solid #ff263f; border-radius:8px; background:#030303; box-shadow:0 0 0 100vmax rgba(0,0,0,.96); }
+    .summary-card.summary-danger .summary-emoji { color:#ff263f; }
+    .summary-card.summary-danger h2 { color:#ff263f; font-size:clamp(26px, 7vw, 36px); line-height:1.04; text-transform:uppercase; }
+    .summary-card.summary-danger p { color:#fff; line-height:1.45; }
     .summary { z-index:800; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:18px; background:rgba(3,8,20,.8); backdrop-filter:blur(8px); }
     .summary.hidden { display:none; }
     .summary-card { width:min(100%,420px); padding:24px; border-radius:27px; background:#111c33; border:1px solid var(--line); box-shadow:0 25px 90px #0007; text-align:center; }
@@ -102,6 +117,7 @@
     .coin-icon, .player-icon, .ghost-icon { background:transparent; border:none; }
     .coin { display:grid; place-items:center; width:28px; height:28px; font-size:22px; filter:drop-shadow(0 2px 4px #0008); animation:coinBob 1.4s ease-in-out infinite; }
     .player { display:grid; place-items:center; width:44px; height:44px; border:3px solid white; border-radius:50%; background:#ffdc4b; font-size:25px; box-shadow:0 0 0 6px #ffd4473d, 0 4px 14px #0007; }
+    .heading-cone { stroke:#29d8ff; stroke-width:2; fill:#29d8ff; fill-opacity:.25; pointer-events:none; }
     .ghost { display:grid; place-items:center; width:35px; height:35px; font-size:29px; filter:drop-shadow(0 2px 4px #0008); }
     .start-pulse { animation:pulse 1.4s infinite; }
     @keyframes coinBob { 0%,100% { transform:translateY(0) scale(1); } 50% { transform:translateY(-3px) scale(1.07); } }
@@ -110,7 +126,8 @@
     @media (min-width:700px) {
       header { padding-inline:22px; }
       .stats { top:82px; left:22px; right:auto; width:370px; }
-      .banner { left:auto; right:22px; top:82px; width:390px; }
+      .banner:not(.safety-critical) { left:auto; right:22px; top:82px; width:390px; }
+      .coin-guide { top:158px; }
       .bottom-dock { padding:12px 22px calc(12px + var(--safe-bottom)); }
       .dock-actions { max-width:450px; margin-left:auto; }
       .status-row { position:absolute; left:22px; bottom:27px; max-width:50%; margin:0; }
@@ -133,6 +150,10 @@
       .welcome-footer .footer-note { display:none; }
     }
     @media (max-height:500px) {
+      .coin-guide { top:126px; padding:5px 9px 5px 6px; gap:7px; }
+      .coin-guide-arrow { width:34px; height:34px; font-size:22px; }
+      .coin-guide-title { font-size:9px; }
+      .coin-guide-copy > div:last-child { font-size:10px; }
       .welcome { top:calc(env(safe-area-inset-top, 0px) + 54px); bottom:calc(104px + var(--safe-bottom)); left:8px; right:8px; border-radius:16px; }
       .welcome-scroll { padding:10px 13px 6px; }
       .welcome-footer { padding:6px 10px 7px; }
@@ -164,6 +185,10 @@
     <div class="stat"><div class="stat-label">Coins</div><div class="stat-value" id="coinStat">🪙 0</div></div>
     <div class="stat"><div class="stat-label">Distance</div><div class="stat-value" id="distanceStat">0.00 km</div></div>
     <div class="stat"><div class="stat-label">Time left</div><div class="stat-value" id="timeStat">10:00</div></div>
+  </div>
+  <div id="coinGuide" class="coin-guide hidden" aria-live="polite">
+    <div id="coinArrow" class="coin-guide-arrow" aria-hidden="true">↑</div>
+    <div class="coin-guide-copy"><div class="coin-guide-title">Nearest safe coin</div><div id="coinGuideText">Finding a safe walking route…</div></div>
   </div>
   <div id="safetyBanner" class="banner hidden" role="status">
     <div class="banner-icon" id="bannerIcon">⚠️</div>
@@ -203,7 +228,7 @@
   </div>
 </div>
 <div id="summary" class="summary hidden" role="dialog" aria-modal="true" aria-labelledby="summaryTitle">
-  <div class="summary-card">
+  <div class="summary-card" id="summaryCard">
     <div class="summary-emoji" id="summaryEmoji">🏆</div>
     <h2 id="summaryTitle">Quest complete!</h2>
     <p id="summarySubtitle">Nice work getting out there.</p>
@@ -214,7 +239,7 @@
       <div class="summary-metric"><strong id="summaryGhosts">0</strong><span>Ghost encounters</span></div>
     </div>
     <button id="againButton" class="btn btn-primary wide" type="button">↻ Play again</button>
-    <p class="fineprint">Distance is estimated from filtered phone location samples. Intersection detection is not guaranteed; always obey traffic rules and stay aware of your surroundings.</p>
+    <p class="fineprint" id="summaryFineprint">Distance is estimated from filtered phone location samples. Intersection and unsafe-crossing detection are best-effort only; always obey traffic rules and stay aware of your surroundings.</p>
   </div>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
@@ -226,10 +251,14 @@
   const MAX_WALK_SPEED_MPS = 8;
   const MIN_DISTANCE_STEP_M = 3;
   const COIN_PICKUP_BUFFER_M = 14;
-  const INTERSECTION_PAUSE_M = 30;
-  const INTERSECTION_RESUME_M = 40;
-  // Keep the request focused on local walkable streets; avoid larger arterial roads.
-  const HIGHWAY_RE = '^(residential|living_street|unclassified|footway|path|pedestrian|cycleway|steps|service|track|bridleway)$';
+  // Reduced by 5 m from the original 30 m pause / 40 m resume distances.
+  const INTERSECTION_PAUSE_M = 25;
+  const INTERSECTION_RESUME_M = 35;
+  const COIN_INTERSECTION_CLEARANCE_M = INTERSECTION_PAUSE_M + 5;
+  const COIN_WALKWAY_HIGHWAYS = new Set(['footway', 'path', 'pedestrian', 'steps']);
+  const VEHICLE_ROAD_HIGHWAYS = new Set(['primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'unclassified', 'residential', 'living_street', 'service', 'track', 'road']);
+  // Include walkways and local/arterial street geometry so unsafe mid-block crossing can be estimated.
+  const HIGHWAY_RE = '^(primary|primary_link|secondary|secondary_link|tertiary|tertiary_link|residential|living_street|unclassified|footway|path|pedestrian|cycleway|steps|service|track|bridleway|road)$';
   // Public Overpass instances are community-operated and can be busy. Try independent instances.
   const OVERPASS_ENDPOINTS = [
     'https://overpass-api.de/api/interpreter',
@@ -239,8 +268,16 @@
   const GHOST_EMOJIS = ['👻', '👾', '💜', '👻'];
   const $ = id => document.getElementById(id);
 
-  const map = L.map('map', { zoomControl: false, preferCanvas: true }).setView([20, 0], 2);
-  L.control.zoom({ position: 'bottomright' }).addTo(map);
+  // Disable every Leaflet zoom gesture/control: zooming can make a coin look like a road target.
+  const map = L.map('map', {
+    zoomControl: false,
+    scrollWheelZoom: false,
+    doubleClickZoom: false,
+    touchZoom: false,
+    boxZoom: false,
+    keyboard: false,
+    preferCanvas: true
+  }).setView([20, 0], 2);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap contributors</a>'
@@ -253,6 +290,12 @@
   let playerMarker = null;
   let startCircle = null;
   let playerAccuracyCircle = null;
+  let headingCone = null;
+  let deviceHeadingDeg = null;
+  let deviceHeadingAt = 0;
+  let courseHeadingDeg = null;
+  let courseHeadingAt = 0;
+  let headingListenersEnabled = false;
   let watchId = null;
   let wakeLock = null;
   let gameStartedAt = 0;
@@ -266,6 +309,8 @@
   let coins = [];
   let ghostActors = [];
   let intersections = [];
+  let mappedCrossings = [];
+  let crossingRoadSegments = [];
   let intersectionWasPaused = false;
   let locationPause = false;
   let overpassWays = [];
@@ -299,6 +344,33 @@
   function interpolate(a, b, t) {
     return { lat: a.lat + (b.lat - a.lat) * t, lng: a.lng + (b.lng - a.lng) * t };
   }
+  function normalizeDegrees(degrees) { return ((degrees % 360) + 360) % 360; }
+  function bearingDegrees(from, to) {
+    const toRad = n => n * Math.PI / 180;
+    const lat1 = toRad(from.lat), lat2 = toRad(to.lat), dLon = toRad(to.lng - from.lng);
+    const y = Math.sin(dLon) * Math.cos(lat2);
+    const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+    return normalizeDegrees(Math.atan2(y, x) * 180 / Math.PI);
+  }
+  function destinationPoint(origin, bearing, distance) {
+    const R = 6371000, brng = bearing * Math.PI / 180, angular = distance / R;
+    const lat1 = origin.lat * Math.PI / 180, lon1 = origin.lng * Math.PI / 180;
+    const lat2 = Math.asin(Math.sin(lat1) * Math.cos(angular) + Math.cos(lat1) * Math.sin(angular) * Math.cos(brng));
+    const lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(angular) * Math.cos(lat1), Math.cos(angular) - Math.sin(lat1) * Math.sin(lat2));
+    return { lat: lat2 * 180 / Math.PI, lng: lon2 * 180 / Math.PI };
+  }
+  function activeHeading() {
+    if (deviceHeadingDeg !== null && Date.now() - deviceHeadingAt < 15000) return deviceHeadingDeg;
+    if (courseHeadingDeg !== null && Date.now() - courseHeadingAt < 15000) return courseHeadingDeg;
+    return null;
+  }
+  function directionDescription(relativeDegrees) {
+    const a = ((relativeDegrees + 540) % 360) - 180;
+    if (Math.abs(a) <= 22.5) return 'ahead';
+    if (Math.abs(a) >= 157.5) return 'behind';
+    if (a > 0) return a < 65 ? 'ahead on your right' : (a < 115 ? 'to your right' : 'behind on your right');
+    return a > -65 ? 'ahead on your left' : (a > -115 ? 'to your left' : 'behind on your left');
+  }
   function radiusMeters() { return radiusKm * 1000; }
   function rand(min, max) { return min + Math.random() * (max - min); }
   function shuffle(arr) {
@@ -314,13 +386,18 @@
   function ghostIcon(emoji) {
     return L.divIcon({ className: 'ghost-icon', html: `<div class="ghost">${emoji}</div>`, iconSize: [35,35], iconAnchor: [17,17] });
   }
-  function showBanner(title, copy, icon = '⚠️') {
+  function showBanner(title, copy, icon = '⚠️', variant = '') {
+    const banner = $('safetyBanner');
     $('bannerTitle').textContent = title;
     $('bannerCopy').textContent = copy;
     $('bannerIcon').textContent = icon;
-    $('safetyBanner').classList.remove('hidden');
+    banner.classList.toggle('safety-critical', variant === 'critical');
+    banner.classList.remove('hidden');
   }
-  function hideBanner() { $('safetyBanner').classList.add('hidden'); }
+  function hideBanner() {
+    $('safetyBanner').classList.add('hidden');
+    $('safetyBanner').classList.remove('safety-critical');
+  }
   function setPhase(next) {
     phase = next;
     if (next === 'playing') {
@@ -329,11 +406,11 @@
       setStatus('Quest live. Keep your head up and enjoy the walk.', 'live');
     } else if (next === 'paused-intersection') {
       setPill('SAFETY PAUSE');
-      showBanner('Intersection nearby — game paused', 'Keep your attention on the road. Gameplay resumes after you move clear of the detected intersection zone.', '🚦');
+      showBanner('STOP — INTERSECTION SAFETY PAUSE', 'Put your phone away and cross only when it is safe. The game is paused and will resume after your location leaves the detected safety zone. Detection is not guaranteed.', '🚦', 'critical');
       setStatus('Paused for a detected intersection safety zone.', 'warn');
     } else if (next === 'paused-location') {
       setPill('GPS PAUSE');
-      showBanner('GPS signal needs to settle', 'Gameplay is paused because location accuracy is weak or a GPS jump was detected. Keep walking safely and let the location settle.', '📡');
+      showBanner('GPS SIGNAL NEEDS TO SETTLE', 'Game is paused because location accuracy is weak or a GPS jump was detected. Keep your attention on your surroundings while the location settles.', '📡');
       setStatus('Waiting for reliable GPS fixes before resuming.', 'warn');
     } else if (next === 'loading') {
       setPill('SETTING UP');
@@ -357,10 +434,13 @@
     coins = []; ghostActors = [];
     if (startCircle) map.removeLayer(startCircle);
     if (playerAccuracyCircle) map.removeLayer(playerAccuracyCircle);
-    startCircle = null; playerAccuracyCircle = null;
-    intersections = [];
+    if (headingCone) map.removeLayer(headingCone);
+    startCircle = null; playerAccuracyCircle = null; headingCone = null;
+    intersections = []; mappedCrossings = []; crossingRoadSegments = [];
     overpassWays = [];
+    courseHeadingDeg = null; courseHeadingAt = 0;
     graph = { nodes: new Map(), adj: new Map(), edges: [] };
+    $('coinGuide').classList.add('hidden');
   }
   function geolocationError(err) {
     if (err && err.code === 1) return 'Location permission was denied. Allow location access in your browser settings to play.';
@@ -382,6 +462,32 @@
       return true;
     } catch (_) { wakeLock = null; return false; }
   }
+  function handleDeviceOrientation(event) {
+    let heading = null;
+    if (Number.isFinite(event.webkitCompassHeading)) {
+      heading = event.webkitCompassHeading; // iOS Safari compass heading, degrees clockwise from north.
+    } else if (event.absolute === true && Number.isFinite(event.alpha)) {
+      heading = 360 - event.alpha; // Absolute device orientation on browsers that expose it.
+    }
+    if (heading === null || !Number.isFinite(heading)) return;
+    deviceHeadingDeg = normalizeDegrees(heading);
+    deviceHeadingAt = Date.now();
+    if (lastGoodFix && ['playing', 'paused-intersection', 'paused-location'].includes(phase)) updateHeadingVisuals(lastGoodFix);
+  }
+  async function enableDeviceHeading() {
+    if (headingListenersEnabled || !('DeviceOrientationEvent' in window)) return;
+    try {
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        const permission = await DeviceOrientationEvent.requestPermission();
+        if (permission !== 'granted') return;
+      }
+      window.addEventListener('deviceorientationabsolute', handleDeviceOrientation, true);
+      window.addEventListener('deviceorientation', handleDeviceOrientation, true);
+      headingListenersEnabled = true;
+    } catch (_) {
+      // GPS course will be used as a fallback if the compass permission/API is unavailable.
+    }
+  }
   async function reacquireWakeLock() {
     if (phase === 'playing' || phase === 'paused-intersection' || phase === 'paused-location') await requestWakeLock();
   }
@@ -395,8 +501,8 @@
   });
 
   async function fetchStreetWays(center, radius) {
-    // `out geom qt` makes output ordering faster, and a smaller buffer reduces payload size.
-    const query = `[out:json][timeout:15];way(around:${Math.ceil(radius + 40)},${center.lat.toFixed(6)},${center.lng.toFixed(6)})["highway"~"${HIGHWAY_RE}"];out geom qt;`;
+    // The response includes tags and geometry; qt improves output ordering on larger results.
+    const query = `[out:json][timeout:15];(way(around:${Math.ceil(radius + 40)},${center.lat.toFixed(6)},${center.lng.toFixed(6)})["highway"~"${HIGHWAY_RE}"];node(around:${Math.ceil(radius + 40)},${center.lat.toFixed(6)},${center.lng.toFixed(6)})["highway"="crossing"];);out tags geom qt;`;
     const failures = [];
     for (const endpoint of OVERPASS_ENDPOINTS) {
       const controller = new AbortController();
@@ -418,9 +524,12 @@
           throw new Error(`HTTP ${response.status}${detail ? `: ${detail}` : ''}`);
         }
         const data = await response.json();
-        const ways = (data.elements || []).filter(el => el.type === 'way' && Array.isArray(el.geometry) && el.geometry.length >= 2);
+        const elements = data.elements || [];
+        const ways = elements.filter(el => el.type === 'way' && Array.isArray(el.geometry) && el.geometry.length >= 2);
+        const crossings = elements.filter(el => el.type === 'node' && el.tags?.highway === 'crossing' && Number.isFinite(el.lat) && Number.isFinite(el.lon))
+          .map(el => ({ lat: el.lat, lng: el.lon, key: `crossing-${el.id}` }));
         if (!ways.length) throw new Error('No walkable streets were found nearby.');
-        return ways;
+        return { ways, crossings };
       } catch (error) {
         const reason = error?.name === 'AbortError' ? 'request timed out' : (error?.message || 'network error');
         failures.push(`${new URL(endpoint).hostname}: ${reason}`);
@@ -471,9 +580,45 @@
     }
     return { nodes, adj, edges, junctions };
   }
-  function generateCoinPoints(ways, center, radius) {
+  function coinWayInfo(way) {
+    const tags = way.tags || {};
+    const highway = tags.highway || '';
+    if (tags.access === 'no' || tags.access === 'private' || tags.foot === 'no') return null;
+    if (tags.footway === 'crossing' || tags.crossing || highway === 'crossing') return null;
+    if (COIN_WALKWAY_HIGHWAYS.has(highway)) return { kind: 'walkway', side: 0 };
+    // Only use a vehicle-road geometry for coins when OSM explicitly records a sidewalk;
+    // offset the coin off the road centreline onto the mapped sidewalk side.
+    const sidewalk = tags.sidewalk;
+    const left = tags['sidewalk:left'];
+    const right = tags['sidewalk:right'];
+    if (['left', 'right', 'both', 'yes'].includes(sidewalk)) {
+      let side = sidewalk === 'left' ? 1 : sidewalk === 'right' ? -1 : (Number(way.id) % 2 === 0 ? 1 : -1);
+      return { kind: 'sidewalk', side };
+    }
+    if (['yes', 'both'].includes(left) && !['yes', 'both'].includes(right)) return { kind: 'sidewalk', side: 1 };
+    if (['yes', 'both'].includes(right) && !['yes', 'both'].includes(left)) return { kind: 'sidewalk', side: -1 };
+    return null;
+  }
+  function offsetFromRoad(point, a, b, side, distance = 4.5) {
+    const latRad = point.lat * Math.PI / 180;
+    const east = (b.lng - a.lng) * 111320 * Math.cos(latRad);
+    const north = (b.lat - a.lat) * 110574;
+    const length = Math.hypot(east, north) || 1;
+    // Left side normal is (-north, east); right side is its inverse.
+    const eastOffset = (-north / length) * distance * side;
+    const northOffset = (east / length) * distance * side;
+    return { lat: point.lat + northOffset / 110574, lng: point.lng + eastOffset / (111320 * Math.cos(latRad) || 1) };
+  }
+  function nearestIntersectionDistance(p, junctions = intersections) {
+    let nearest = Infinity;
+    for (const junction of junctions) nearest = Math.min(nearest, distanceMeters(p, junction));
+    return nearest;
+  }
+  function generateCoinPoints(ways, center, radius, junctions = intersections) {
     const candidates = [];
     for (const way of ways) {
+      const info = coinWayInfo(way);
+      if (!info) continue; // Never spawn a coin on an unannotated vehicle-road centreline.
       const geom = way.geometry;
       for (let i = 0; i < geom.length - 1; i++) {
         const a = { lat: geom[i].lat, lng: geom[i].lon };
@@ -481,11 +626,12 @@
         const len = distanceMeters(a, b);
         if (len < 7) continue;
         const sampleCount = Math.ceil(len / 18);
-        for (let s = 1; s < sampleCount; s++) {
-          if (Math.random() > 0.20) continue;
-          const p = interpolate(a, b, s / sampleCount);
+        for (let sample = 1; sample < sampleCount; sample++) {
+          if (Math.random() > 0.38) continue;
+          let p = interpolate(a, b, sample / sampleCount);
+          if (info.kind === 'sidewalk') p = offsetFromRoad(p, a, b, info.side, 4.5);
           const d = distanceMeters(center, p);
-          if (d <= radius - 12 && d > 18) candidates.push(p);
+          if (d <= radius - 20 && d > 18 && nearestIntersectionDistance(p, junctions) > COIN_INTERSECTION_CLEARANCE_M) candidates.push(p);
         }
       }
     }
@@ -493,11 +639,90 @@
     const chosen = [];
     const target = radius <= 1200 ? 38 : radius <= 2200 ? 58 : 76;
     for (const p of candidates) {
+      // Check the safety buffers again after selection so no chosen coin can end up inside one.
+      if (nearestIntersectionDistance(p, junctions) <= COIN_INTERSECTION_CLEARANCE_M) continue;
       if (chosen.every(q => distanceMeters(p, q) >= 38)) chosen.push(p);
       if (chosen.length >= target) break;
     }
-    if (chosen.length < Math.min(12, target)) throw new Error('Not enough nearby walkable streets were found to place coins. Try another starting point or a larger radius.');
+    if (chosen.length < Math.min(8, target)) throw new Error('There are not enough mapped sidewalks or pedestrian paths nearby to place coins safely. Try a different area or a larger radius. Coins are not placed on unannotated road centre-lines.');
     return chosen;
+  }
+  function buildCrossingRoadSegments(ways) {
+    const segments = [];
+    for (const way of ways) {
+      const highway = way.tags?.highway;
+      if (!VEHICLE_ROAD_HIGHWAYS.has(highway)) continue;
+      if (way.tags?.motor_vehicle === 'no' || way.tags?.access === 'no' || way.tags?.access === 'private') continue;
+      if (way.tags?.highway === 'service' && ['driveway', 'parking_aisle', 'alley'].includes(way.tags?.service)) continue;
+      const geom = way.geometry || [];
+      for (let i = 0; i < geom.length - 1; i++) {
+        const a = { lat: geom[i].lat, lng: geom[i].lon };
+        const b = { lat: geom[i + 1].lat, lng: geom[i + 1].lon };
+        if (distanceMeters(a, b) >= 2) segments.push({ a, b, highway });
+      }
+    }
+    return segments;
+  }
+  function segmentCrossingPoint(a, b, c, d, minT = 0.10) {
+    // Local equirectangular projection is sufficiently accurate for short GPS steps.
+    const lat0 = (a.lat + b.lat + c.lat + d.lat) / 4 * Math.PI / 180;
+    const sx = 111320 * Math.cos(lat0), sy = 110574;
+    const A = { x: a.lng * sx, y: a.lat * sy }, B = { x: b.lng * sx, y: b.lat * sy };
+    const C = { x: c.lng * sx, y: c.lat * sy }, D = { x: d.lng * sx, y: d.lat * sy };
+    const r = { x: B.x - A.x, y: B.y - A.y }, q = { x: D.x - C.x, y: D.y - C.y };
+    const cross = (u, v) => u.x * v.y - u.y * v.x;
+    const den = cross(r, q);
+    if (Math.abs(den) < 0.1) return null;
+    const delta = { x: C.x - A.x, y: C.y - A.y };
+    const t = cross(delta, q) / den;
+    const u = cross(delta, r) / den;
+    if (t < minT || t > 1 - minT || u < -0.02 || u > 1.02) return null;
+    return interpolate(a, b, t);
+  }
+  function detectedUnsafeRoadCrossing(previous, current) {
+    if (!previous || previous.accuracy > 20 || current.accuracy > 20) return null;
+    const travel = distanceMeters(previous, current);
+    if (travel < 3 || travel > 45 || !crossingRoadSegments.length) return null;
+    const moveBearing = bearingDegrees(previous, current);
+    const minLat = Math.min(previous.lat, current.lat), maxLat = Math.max(previous.lat, current.lat);
+    const minLng = Math.min(previous.lng, current.lng), maxLng = Math.max(previous.lng, current.lng);
+    // Small bounding expansion tolerates minor GPS error without treating parallel walking as a crossing.
+    const latPad = 0.000025, lngPad = 0.00003;
+    for (const seg of crossingRoadSegments) {
+      if (Math.max(seg.a.lat, seg.b.lat) < minLat - latPad || Math.min(seg.a.lat, seg.b.lat) > maxLat + latPad) continue;
+      if (Math.max(seg.a.lng, seg.b.lng) < minLng - lngPad || Math.min(seg.a.lng, seg.b.lng) > maxLng + lngPad) continue;
+      const roadBearing = bearingDegrees(seg.a, seg.b);
+      const rawAngle = ((moveBearing - roadBearing) % 180 + 180) % 180;
+      const crossingAngle = Math.min(rawAngle, 180 - rawAngle);
+      if (crossingAngle < 28) continue; // Ignore movement roughly parallel to a road.
+      const crossing = segmentCrossingPoint(previous, current, seg.a, seg.b);
+      if (!crossing) continue;
+      // An OSM junction or marked pedestrian crossing is a permitted crossing zone.
+      const nearestLegalCrossing = nearestIntersectionDistance(crossing, intersections);
+      if (nearestLegalCrossing <= INTERSECTION_PAUSE_M + 8) continue;
+      return crossing;
+    }
+    return null;
+  }
+  function hasSafeDirectCoinApproach(from, coin) {
+    // The pointer must not tell the player to walk directly across a vehicle road mid-block.
+    if (!crossingRoadSegments.length) return false;
+    const moveDistance = distanceMeters(from, coin);
+    if (moveDistance < 1) return true;
+    const moveBearing = bearingDegrees(from, coin);
+    const minLat = Math.min(from.lat, coin.lat), maxLat = Math.max(from.lat, coin.lat);
+    const minLng = Math.min(from.lng, coin.lng), maxLng = Math.max(from.lng, coin.lng);
+    for (const seg of crossingRoadSegments) {
+      if (Math.max(seg.a.lat, seg.b.lat) < minLat || Math.min(seg.a.lat, seg.b.lat) > maxLat) continue;
+      if (Math.max(seg.a.lng, seg.b.lng) < minLng || Math.min(seg.a.lng, seg.b.lng) > maxLng) continue;
+      const roadBearing = bearingDegrees(seg.a, seg.b);
+      const rawAngle = ((moveBearing - roadBearing) % 180 + 180) % 180;
+      if (Math.min(rawAngle, 180 - rawAngle) < 28) continue;
+      const crossing = segmentCrossingPoint(from, coin, seg.a, seg.b, 0.01);
+      if (!crossing) continue;
+      if (nearestIntersectionDistance(crossing, intersections) > INTERSECTION_PAUSE_M + 8) return false;
+    }
+    return true;
   }
   function addCoins(points) {
     coins = points.map((latlng, i) => {
@@ -584,6 +809,61 @@
     if (!playerAccuracyCircle) playerAccuracyCircle = L.circle([p.lat,p.lng], { radius: accuracy || 10, color:'#ffffff', weight:1, opacity:.35, fillColor:'#dce8ff', fillOpacity:.07, interactive:false }).addTo(map);
     else { playerAccuracyCircle.setLatLng([p.lat,p.lng]); playerAccuracyCircle.setRadius(accuracy || 10); }
   }
+  function updateHeadingVisuals(p) {
+    if (!p) return;
+    const heading = activeHeading();
+    if (heading !== null && Number.isFinite(heading)) {
+      const left = destinationPoint(p, heading - 28, 43);
+      const tip = destinationPoint(p, heading, 50);
+      const right = destinationPoint(p, heading + 28, 43);
+      const points = [[p.lat,p.lng], [left.lat,left.lng], [tip.lat,tip.lng], [right.lat,right.lng]];
+      if (!headingCone) {
+        headingCone = L.polygon(points, { className:'heading-cone', color:'#29d8ff', weight:2, opacity:.9, fillColor:'#29d8ff', fillOpacity:.25, interactive:false, bubblingMouseEvents:false }).addTo(map);
+      } else {
+        headingCone.setLatLngs(points);
+        headingCone.setStyle({ opacity:.9, fillOpacity:.25 });
+      }
+      if (playerMarker) playerMarker.setZIndexOffset(1200);
+    } else if (headingCone) {
+      headingCone.setStyle({ opacity:0, fillOpacity:0 });
+    }
+    updateCoinGuide(p);
+  }
+  function updateCoinGuide(p) {
+    const guide = $('coinGuide');
+    if (!p || !['playing','paused-intersection','paused-location'].includes(phase)) {
+      guide.classList.add('hidden');
+      return;
+    }
+    const remaining = coins.filter(coin => !coin.collected);
+    guide.classList.remove('hidden');
+    if (!remaining.length) {
+      $('coinArrow').style.display = 'none';
+      $('coinGuideText').textContent = 'All coins collected — great job!';
+      return;
+    }
+    let nearest = null, nearestDistance = Infinity;
+    for (const coin of remaining) {
+      const d = distanceMeters(p, coin);
+      if (d < nearestDistance && hasSafeDirectCoinApproach(p, coin)) { nearest = coin; nearestDistance = d; }
+    }
+    if (!nearest) {
+      $('coinArrow').style.display = 'none';
+      $('coinGuideText').textContent = 'No safe direct direction. Follow mapped sidewalks to a marked crossing.';
+      return;
+    }
+    $('coinArrow').style.display = 'grid';
+    const targetBearing = bearingDegrees(p, nearest);
+    const heading = activeHeading();
+    const relative = heading === null ? targetBearing : targetBearing - heading;
+    $('coinArrow').style.transform = `rotate(${relative}deg)`;
+    $('coinGuideText').textContent = heading === null
+      ? `${Math.round(nearestDistance)} m · ${cardinalDirection(targetBearing)} on the north-up map`
+      : `${Math.round(nearestDistance)} m · ${directionDescription(relative)}`;
+  }
+  function cardinalDirection(degrees) {
+    return ['N','NE','E','SE','S','SW','W','NW'][Math.round(normalizeDegrees(degrees) / 45) % 8];
+  }
   function findNearbyIntersection(p) {
     let min = Infinity, closest = null;
     for (const junction of intersections) {
@@ -627,6 +907,7 @@
         coinsCollected++;
       }
     }
+    updateCoinGuide(p);
   }
   function handlePosition(position) {
     const p = { lat: position.coords.latitude, lng: position.coords.longitude };
@@ -634,7 +915,7 @@
     latestAccuracy = accuracy;
     updatePlayerMarker(p, Math.min(accuracy || 10, 200));
     if (startCenter && !playerMarker._hasCenteredOnce) {
-      map.setView([p.lat,p.lng], 17); playerMarker._hasCenteredOnce = true;
+      map.panTo([p.lat,p.lng], { animate:false }); playerMarker._hasCenteredOnce = true;
     }
     if (phase === 'ready' || phase === 'loading' || phase === 'ended') {
       if (phase === 'loading' && accuracy <= MAX_ACCURACY_M) lastGoodFix = { ...p, accuracy, timestamp: position.timestamp };
@@ -659,7 +940,22 @@
       return;
     }
     const previousFix = lastGoodFix;
+    if (previousFix) {
+      const fixDistance = distanceMeters(previousFix, p);
+      if (fixDistance >= Math.max(5, Math.min(10, accuracy * 0.25)) && accuracy <= 20 && (previousFix.accuracy || 999) <= 20) {
+        courseHeadingDeg = bearingDegrees(previousFix, p);
+        courseHeadingAt = Date.now();
+      }
+      if (['playing', 'paused-intersection'].includes(phase)) {
+        const unsafeCrossing = detectedUnsafeRoadCrossing(previousFix, { ...p, accuracy });
+        if (unsafeCrossing) {
+          endGame('unsafe-crossing');
+          return;
+        }
+      }
+    }
     lastGoodFix = { ...p, accuracy, timestamp: position.timestamp };
+    updateHeadingVisuals(lastGoodFix);
     if (phase === 'paused-location') {
       changePauseState(p, true);
       return;
@@ -674,7 +970,8 @@
     } else if (!distanceAnchor) distanceAnchor = p;
     ignoreNextFixForDistance = false;
     changePauseState(p, true);
-    checkCoins(p, accuracy);
+    if (phase === 'playing') checkCoins(p, accuracy);
+    updateCoinGuide(p);
     updateStats();
   }
   function startWatch() {
@@ -699,6 +996,7 @@
     $('startError').textContent = '';
     $('startButton').textContent = '⏳ LOADING…';
     appLocationError = '';
+    void enableDeviceHeading(); // Must be initiated by the start tap on browsers requiring compass permission.
     setPhase('loading');
     setStatus('Requesting high-accuracy location…', 'warn');
     try {
@@ -715,11 +1013,18 @@
       updatePlayerMarker(startCenter, position.coords.accuracy);
       startWatch();
       setStatus('Loading walkable street paths and creating your coin quest…', 'warn');
-      const ways = await fetchStreetWays(startCenter, radiusMeters());
+      const streetData = await fetchStreetWays(startCenter, radiusMeters());
+      const ways = streetData.ways;
+      mappedCrossings = streetData.crossings || [];
       overpassWays = ways;
-      graph = buildRoadGraph(ways, startCenter, radiusMeters());
-      intersections = graph.junctions;
-      const coinPoints = generateCoinPoints(ways, startCenter, radiusMeters());
+      // Calculate legal/safety junctions from vehicle-road geometry, not footpath forks.
+      const roadSafetyGraph = buildRoadGraph(ways.filter(way => VEHICLE_ROAD_HIGHWAYS.has(way.tags?.highway)), startCenter, radiusMeters());
+      intersections = [...roadSafetyGraph.junctions, ...mappedCrossings];
+      crossingRoadSegments = buildCrossingRoadSegments(ways);
+      // Keep ghosts off the larger arterial road classes; they roam local streets and pedestrian ways.
+      const ghostWays = ways.filter(way => !['primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link'].includes(way.tags?.highway));
+      graph = buildRoadGraph(ghostWays, startCenter, radiusMeters());
+      const coinPoints = generateCoinPoints(ways, startCenter, radiusMeters(), intersections);
       addCoins(coinPoints);
       addGhosts();
       if (intersections.length === 0) {
@@ -739,7 +1044,9 @@
       $('startButton').disabled = true;
       $('startButton').textContent = '▶ START GAME';
       setPhase('playing');
-      setStatus(`Quest live: ${coins.length} coins and ${ghostActors.length} ghosts. Eyes up while walking!`, 'live');
+      updateHeadingVisuals(lastGoodFix || startCenter);
+      updateCoinGuide(lastGoodFix || startCenter);
+      setStatus(`Quest live: ${coins.length} coins and ${ghostActors.length} ghosts. Coins are placed on mapped walking paths/sidewalks only. Eyes up while walking!`, 'live');
       if (intersections.length === 0) showBanner('Safety note: no intersections mapped', 'Street data did not identify intersections in this area. Never rely on auto-pause; stop and look up at every road crossing.', '⚠️');
       updateStats();
       requestWakeLock();
@@ -774,9 +1081,16 @@
     stopTracking();
     $('stopButton').disabled = true;
     $('centerButton').disabled = true;
-    $('summaryEmoji').textContent = reason === 'time' ? '🏆' : '🎉';
-    $('summaryTitle').textContent = reason === 'time' ? 'Time’s up!' : 'Quest complete!';
-    $('summarySubtitle').textContent = reason === 'time' ? 'Ten minutes of movement — great job getting outside.' : 'Nice work getting outside. Every step counts.';
+    const unsafeCrossing = reason === 'unsafe-crossing';
+    $('summaryCard').classList.toggle('summary-danger', unsafeCrossing);
+    $('summaryEmoji').textContent = unsafeCrossing ? '🚨' : (reason === 'time' ? '🏆' : '🎉');
+    $('summaryTitle').textContent = unsafeCrossing ? 'Unsafe crossing detected' : (reason === 'time' ? 'Time’s up!' : 'Quest complete!');
+    $('summarySubtitle').textContent = unsafeCrossing
+      ? 'The game ended because your GPS path appears to cross a mapped vehicle road away from a mapped intersection or marked crossing. Stop, look up, and cross only at a safe legal crossing.'
+      : (reason === 'time' ? 'Ten minutes of movement — great job getting outside.' : 'Nice work getting outside. Every step counts.');
+    $('summaryFineprint').textContent = unsafeCrossing
+      ? 'This alert is a best-effort estimate, not proof: GPS and map data can be inaccurate or incomplete. The game cannot reliably detect every unsafe crossing. Always obey traffic laws and use safe crossings.'
+      : 'Distance is estimated from filtered phone location samples. Intersection and unsafe-crossing detection are best-effort only; always obey traffic rules and stay aware of your surroundings.';
     $('summaryCoins').textContent = String(coinsCollected);
     $('summaryDistance').textContent = fmtDistance(distanceTravelledM);
     $('summaryTime').textContent = fmtTime(elapsed);
@@ -813,8 +1127,8 @@
   $('startButton').addEventListener('click', startGame);
   $('stopButton').addEventListener('click', () => endGame('manual'));
   $('centerButton').addEventListener('click', () => {
-    if (lastGoodFix) map.flyTo([lastGoodFix.lat,lastGoodFix.lng], Math.max(map.getZoom(), 16), { duration:.5 });
-    else if (startCenter) map.flyTo([startCenter.lat,startCenter.lng], 16, { duration:.5 });
+    if (lastGoodFix) map.panTo([lastGoodFix.lat,lastGoodFix.lng], { animate:true, duration:.5 });
+    else if (startCenter) map.panTo([startCenter.lat,startCenter.lng], { animate:true, duration:.5 });
   });
   $('againButton').addEventListener('click', resetToReady);
 
