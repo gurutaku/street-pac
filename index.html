@@ -702,7 +702,76 @@
       animation: coinBob 1.4s ease-in-out infinite;
     }
 
+    .coin-collect-effect {
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      background: radial-gradient(circle, #ffd44755 0, #ffd4471c 22%, transparent 58%);
+    }
+
+    .coin-collect-effect.hidden {
+      display: none;
+    }
+
+    .coin-collect-effect.playing {
+      animation: coinCollectionFlash 1.2s ease-out both;
+    }
+
+    .coin-collect-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border: 2px solid #ffdf71;
+      border-radius: 22px;
+      background: rgba(13, 21, 40, .96);
+      box-shadow: 0 0 38px #ffd447aa, 0 12px 40px #0009;
+      color: #ffdf71;
+      font-size: clamp(21px, 6vw, 32px);
+      font-weight: 1000;
+      text-align: center;
+      text-shadow: 0 2px 12px #ffd44788;
+    }
+
+    .coin-collect-icon {
+      font-size: clamp(38px, 10vw, 54px);
+      line-height: 1;
+      animation: coinCollectionSpin .8s ease-out both;
+    }
+
+    .player-marker {
+      position: relative;
+      width: 44px;
+      height: 44px;
+    }
+
+    .player-view-cone {
+      position: absolute;
+      z-index: 0;
+      top: -19px;
+      left: -19px;
+      width: 82px;
+      height: 82px;
+      clip-path: polygon(50% 50%, 0 0, 100% 0);
+      background: #29d8ff55;
+      border: 1px solid #29d8ff;
+      opacity: 0;
+      pointer-events: none;
+      transform: rotate(var(--view-heading, 0deg));
+      transform-origin: center;
+      transition: transform .2s ease-out, opacity .2s ease-out;
+    }
+
+    .player-view-cone.visible {
+      opacity: 1;
+    }
+
     .player {
+      position: relative;
+      z-index: 1;
       display: grid;
       place-items: center;
       width: 44px;
@@ -712,14 +781,6 @@
       background: #ffdc4b;
       font-size: 25px;
       box-shadow: 0 0 0 6px #ffd4473d, 0 4px 14px #0007;
-    }
-
-    .heading-cone {
-      stroke: #29d8ff;
-      stroke-width: 2;
-      fill: #29d8ff;
-      fill-opacity: .25;
-      pointer-events: none;
     }
 
     .ghost {
@@ -747,6 +808,19 @@
       }
     }
 
+    @keyframes coinCollectionFlash {
+      0% { opacity: 0; }
+      15% { opacity: 1; }
+      75% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    @keyframes coinCollectionSpin {
+      0% { transform: scale(.2) rotate(-120deg); }
+      65% { transform: scale(1.25) rotate(18deg); }
+      100% { transform: scale(1) rotate(0); }
+    }
+
     @keyframes pulse {
 
       0%,
@@ -756,6 +830,13 @@
 
       50% {
         box-shadow: 0 0 0 11px #57e2bd05;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .coin-collect-effect.playing,
+      .coin-collect-icon {
+        animation: none;
       }
     }
 
@@ -976,6 +1057,12 @@
       <div class="pill" id="modePill">READY TO ROAM</div>
     </header>
     <div id="map" aria-label="Street map for the walking game"></div>
+    <div id="coinCollectEffect" class="coin-collect-effect hidden" aria-hidden="true">
+      <div class="coin-collect-content">
+        <span class="coin-collect-icon">🪙</span>
+        <span id="coinCollectText">COIN COLLECTED!</span>
+      </div>
+    </div>
     <div class="stats" aria-live="polite">
       <div class="stat">
         <div class="stat-label">Coins</div>
@@ -1073,7 +1160,8 @@
       const MAX_ACCURACY_M = 40;
       const MAX_WALK_SPEED_MPS = 8;
       const MIN_DISTANCE_STEP_M = 3;
-      const COIN_PICKUP_BUFFER_M = 14;
+      const COIN_PICKUP_BUFFER_M = 30;
+      const COIN_PICKUP_GPS_BUFFER_MAX_M = 10;
       const INTERSECTION_PAUSE_M = 10;
       const INTERSECTION_RESUME_M = 5;
       const COIN_INTERSECTION_CLEARANCE_M = INTERSECTION_PAUSE_M + 5;
@@ -1112,7 +1200,6 @@
       let playerMarker = null;
       let startCircle = null;
       let playerAccuracyCircle = null;
-      let headingCone = null;
       let deviceHeadingDeg = null;
       let deviceHeadingAt = 0;
       let courseHeadingDeg = null;
@@ -1123,6 +1210,7 @@
       let wakeLock = null;
       let gameStartedAt = 0;
       let coinsCollected = 0;
+      let coinEffectTimeout = null;
       let distanceTravelledM = 0;
       let ghostEncounters = 0;
       let lastGoodFix = null;
@@ -1175,13 +1263,6 @@
         const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
         return normalizeDegrees(Math.atan2(y, x) * 180 / Math.PI);
       }
-      function destinationPoint(origin, bearing, distance) {
-        const R = 6371000, brng = bearing * Math.PI / 180, angular = distance / R;
-        const lat1 = origin.lat * Math.PI / 180, lon1 = origin.lng * Math.PI / 180;
-        const lat2 = Math.asin(Math.sin(lat1) * Math.cos(angular) + Math.cos(lat1) * Math.sin(angular) * Math.cos(brng));
-        const lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(angular) * Math.cos(lat1), Math.cos(angular) - Math.sin(lat1) * Math.sin(lat2));
-        return { lat: lat2 * 180 / Math.PI, lng: lon2 * 180 / Math.PI };
-      }
       function activeHeading() {
         if (deviceHeadingDeg !== null && Date.now() - deviceHeadingAt < 15000) return deviceHeadingDeg;
         if (courseHeadingDeg !== null && Date.now() - courseHeadingAt < 15000) return courseHeadingDeg;
@@ -1201,7 +1282,10 @@
         return arr;
       }
       function playerIcon() {
-        return L.divIcon({ className: 'player-icon', html: `<div class="player">${selectedCharacter}</div>`, iconSize: [44, 44], iconAnchor: [22, 22] });
+        const heading = activeHeading();
+        const coneStyle = heading === null ? '' : ` style="--view-heading:${heading}deg"`;
+        const coneClass = heading === null ? 'player-view-cone' : 'player-view-cone visible';
+        return L.divIcon({ className: 'player-icon', html: `<div class="player-marker"><div class="${coneClass}"${coneStyle}></div><div class="player">${selectedCharacter}</div></div>`, iconSize: [44, 44], iconAnchor: [22, 22] });
       }
       function coinIcon() {
         return L.divIcon({ className: 'coin-icon', html: '<div class="coin">🪙</div>', iconSize: [28, 28], iconAnchor: [14, 14] });
@@ -1267,19 +1351,39 @@
         $('distanceStat').textContent = fmtDistance(distanceTravelledM);
         if (gameStartedAt) $('timeStat').textContent = fmtTime(GAME_DURATION_MS - (Date.now() - gameStartedAt));
       }
+      function showCoinCollectionEffect(count) {
+        const effect = $('coinCollectEffect');
+        $('coinCollectText').textContent = count === 1 ? 'COIN COLLECTED!' : `${count} COINS COLLECTED!`;
+        effect.classList.add('hidden');
+        effect.classList.remove('playing');
+        void effect.offsetWidth;
+        effect.classList.remove('hidden');
+        effect.classList.add('playing');
+        if (coinEffectTimeout !== null) clearTimeout(coinEffectTimeout);
+        coinEffectTimeout = setTimeout(() => {
+          effect.classList.add('hidden');
+          effect.classList.remove('playing');
+          coinEffectTimeout = null;
+        }, 1200);
+      }
       function clearActors() {
         coins.forEach(c => { if (c.marker) map.removeLayer(c.marker); });
         ghostActors.forEach(g => { if (g.marker) map.removeLayer(g.marker); });
         coins = []; ghostActors = [];
         if (startCircle) map.removeLayer(startCircle);
         if (playerAccuracyCircle) map.removeLayer(playerAccuracyCircle);
-        if (headingCone) map.removeLayer(headingCone);
-        startCircle = null; playerAccuracyCircle = null; headingCone = null;
+        startCircle = null; playerAccuracyCircle = null;
         intersections = []; mappedCrossings = []; crossingRoadSegments = [];
         overpassWays = [];
         courseHeadingDeg = null; courseHeadingAt = 0;
         graph = { nodes: new Map(), adj: new Map(), edges: [] };
         $('coinGuide').classList.add('hidden');
+        $('coinCollectEffect').classList.add('hidden');
+        $('coinCollectEffect').classList.remove('playing');
+        if (coinEffectTimeout !== null) {
+          clearTimeout(coinEffectTimeout);
+          coinEffectTimeout = null;
+        }
       }
       function geolocationError(err) {
         if (err && err.code === 1) return 'Location permission was denied. Allow location access in your browser settings to play.';
@@ -1654,21 +1758,9 @@
       }
       function updateHeadingVisuals(p) {
         if (!p) return;
-        const heading = activeHeading();
-        if (heading !== null && Number.isFinite(heading)) {
-          const left = destinationPoint(p, heading - 28, 43);
-          const tip = destinationPoint(p, heading, 50);
-          const right = destinationPoint(p, heading + 28, 43);
-          const points = [[p.lat, p.lng], [left.lat, left.lng], [tip.lat, tip.lng], [right.lat, right.lng]];
-          if (!headingCone) {
-            headingCone = L.polygon(points, { className: 'heading-cone', color: '#29d8ff', weight: 2, opacity: .9, fillColor: '#29d8ff', fillOpacity: .25, interactive: false, bubblingMouseEvents: false }).addTo(map);
-          } else {
-            headingCone.setLatLngs(points);
-            headingCone.setStyle({ opacity: .9, fillOpacity: .25 });
-          }
-          if (playerMarker) playerMarker.setZIndexOffset(1200);
-        } else if (headingCone) {
-          headingCone.setStyle({ opacity: 0, fillOpacity: 0 });
+        if (playerMarker) {
+          playerMarker.setIcon(playerIcon());
+          if (activeHeading() !== null) playerMarker.setZIndexOffset(1200);
         }
         updateCoinGuide(p);
       }
@@ -1685,11 +1777,7 @@
           $('coinGuideText').textContent = 'All coins collected — great job!';
           return;
         }
-        let nearest = null, nearestDistance = Infinity;
-        for (const coin of remaining) {
-          const d = distanceMeters(p, coin);
-          if (d < nearestDistance && hasSafeDirectCoinApproach(p, coin)) { nearest = coin; nearestDistance = d; }
-        }
+        const { coin: nearest, distance: nearestDistance } = getNearestSafeCoin(p);
         if (!nearest) {
           $('coinArrow').style.display = 'none';
           $('coinGuideText').textContent = 'No safe direct direction. Follow mapped sidewalks to a marked crossing.';
@@ -1739,16 +1827,28 @@
         }
         if (phase !== 'playing') setPhase('playing');
       }
-      function checkCoins(p, accuracy) {
-        if (phase !== 'playing') return;
-        const pickupRadius = Math.max(9, Math.min(COIN_PICKUP_BUFFER_M, (accuracy || 20) * .45));
+      function getNearestSafeCoin(p) {
+        let nearest = null, nearestDistance = Infinity;
         for (const coin of coins) {
           if (coin.collected) continue;
-          if (distanceMeters(p, { lat: coin.lat, lng: coin.lng }) <= pickupRadius) {
-            coin.collected = true;
-            map.removeLayer(coin.marker);
-            coinsCollected++;
+          const d = distanceMeters(p, coin);
+          if (d < nearestDistance && hasSafeDirectCoinApproach(p, coin)) {
+            nearest = coin;
+            nearestDistance = d;
           }
+        }
+        return { coin: nearest, distance: nearestDistance };
+      }
+      function checkCoins(p, accuracy) {
+        if (phase !== 'playing') return;
+        const gpsBuffer = Number.isFinite(accuracy) ? Math.min(COIN_PICKUP_GPS_BUFFER_MAX_M, Math.max(0, accuracy)) : 0;
+        const pickupRadius = COIN_PICKUP_BUFFER_M + gpsBuffer;
+        const target = getNearestSafeCoin(p);
+        if (target.coin && target.distance <= pickupRadius) {
+          target.coin.collected = true;
+          map.removeLayer(target.coin.marker);
+          coinsCollected++;
+          showCoinCollectionEffect(1);
         }
         updateCoinGuide(p);
       }
