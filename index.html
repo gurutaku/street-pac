@@ -1105,8 +1105,7 @@
         </div>
         <div class="field-label">Choose your character</div>
         <div class="characters" id="characters" role="group" aria-label="Choose your player character">
-          <button class="character" type="button" data-character="🟡" aria-label="Yellow arcade character"
-            aria-pressed="true">🟡</button>
+          <button class="character" type="button" data-character="🧙‍♂️" aria-label="Wizard" aria-pressed="true">🧙‍♂️</button>
           <button class="character" type="button" data-character="🐱" aria-label="Cat" aria-pressed="false">🐱</button>
           <button class="character" type="button" data-character="🐸" aria-label="Frog" aria-pressed="false">🐸</button>
           <button class="character" type="button" data-character="🦊" aria-label="Fox" aria-pressed="false">🦊</button>
@@ -1295,6 +1294,7 @@
       }
       function showBanner(title, copy, icon = '⚠️', variant = '') {
         const banner = $('safetyBanner');
+        if (variant === 'critical') hideCoinCollectionEffect();
         $('bannerTitle').textContent = title;
         $('bannerCopy').textContent = copy;
         $('bannerIcon').textContent = icon;
@@ -1352,6 +1352,7 @@
         if (gameStartedAt) $('timeStat').textContent = fmtTime(GAME_DURATION_MS - (Date.now() - gameStartedAt));
       }
       function showCoinCollectionEffect(count) {
+        if (phase !== 'playing' || jaywalkWarningActive || $('safetyBanner').classList.contains('safety-critical')) return;
         const effect = $('coinCollectEffect');
         $('coinCollectText').textContent = count === 1 ? 'COIN COLLECTED!' : `${count} COINS COLLECTED!`;
         effect.classList.add('hidden');
@@ -1366,6 +1367,14 @@
           coinEffectTimeout = null;
         }, 1200);
       }
+      function hideCoinCollectionEffect() {
+        $('coinCollectEffect').classList.add('hidden');
+        $('coinCollectEffect').classList.remove('playing');
+        if (coinEffectTimeout !== null) {
+          clearTimeout(coinEffectTimeout);
+          coinEffectTimeout = null;
+        }
+      }
       function clearActors() {
         coins.forEach(c => { if (c.marker) map.removeLayer(c.marker); });
         ghostActors.forEach(g => { if (g.marker) map.removeLayer(g.marker); });
@@ -1378,12 +1387,7 @@
         courseHeadingDeg = null; courseHeadingAt = 0;
         graph = { nodes: new Map(), adj: new Map(), edges: [] };
         $('coinGuide').classList.add('hidden');
-        $('coinCollectEffect').classList.add('hidden');
-        $('coinCollectEffect').classList.remove('playing');
-        if (coinEffectTimeout !== null) {
-          clearTimeout(coinEffectTimeout);
-          coinEffectTimeout = null;
-        }
+        hideCoinCollectionEffect();
       }
       function geolocationError(err) {
         if (err && err.code === 1) return 'Location permission was denied. Allow location access in your browser settings to play.';
@@ -1840,7 +1844,7 @@
         return { coin: nearest, distance: nearestDistance };
       }
       function checkCoins(p, accuracy) {
-        if (phase !== 'playing') return;
+        if (phase !== 'playing' || jaywalkWarningActive) return;
         const gpsBuffer = Number.isFinite(accuracy) ? Math.min(COIN_PICKUP_GPS_BUFFER_MAX_M, Math.max(0, accuracy)) : 0;
         const pickupRadius = COIN_PICKUP_BUFFER_M + gpsBuffer;
         const target = getNearestSafeCoin(p);
