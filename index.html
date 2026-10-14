@@ -1163,6 +1163,10 @@
       const COIN_PICKUP_GPS_BUFFER_MAX_M = 10;
       const INTERSECTION_PAUSE_M = 10;
       const INTERSECTION_RESUME_M = 5;
+      const STREET_CACHE_DB = 'street-pac-map-cache';
+      const STREET_CACHE_STORE = 'street-data';
+      const STREET_CACHE_VERSION = 1;
+      const STREET_CACHE_MAX_AGE_MONTHS = 3;
       const COIN_INTERSECTION_CLEARANCE_M = INTERSECTION_PAUSE_M + 5;
       const COIN_WALKWAY_HIGHWAYS = new Set(['footway', 'path', 'pedestrian', 'steps']);
       const VEHICLE_ROAD_HIGHWAYS = new Set(['primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'unclassified', 'residential', 'living_street', 'service', 'track', 'road']);
@@ -1450,9 +1454,94 @@
         }
       });
 
+      function openStreetCache() {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open(STREET_CACHE_DB, STREET_CACHE_VERSION);
+          request.onupgradeneeded = () => {
+            const db = request.result;
+            if (!db.objectStoreNames.contains(STREET_CACHE_STORE)) {
+              db.createObjectStore(STREET_CACHE_STORE, { keyPath: 'id' });
+            }
+          };
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error || new Error('Could not open local street-data cache.'));
+        });
+      }
+      function isStreetCacheExpired(savedAt, now) {
+        const expiresAt = new Date(savedAt);
+        expiresAt.setMonth(expiresAt.getMonth() + STREET_CACHE_MAX_AGE_MONTHS);
+        return now > expiresAt.getTime();
+      }
+      function findCachedStreetWays(center, radiusMeters) {
+        return openStreetCache().then(db => new Promise((resolve, reject) => {
+          const transaction = db.transaction(STREET_CACHE_STORE, 'readwrite');
+          const store = transaction.objectStore(STREET_CACHE_STORE);
+          const request = store.getAll();
+          let match = null;
+          request.onsuccess = () => {
+            const now = Date.now();
+            for (const entry of request.result) {
+              if (isStreetCacheExpired(entry.savedAt, now)) {
+                store.delete(entry.id);
+                continue;
+              }
+              if (entry.version !== STREET_CACHE_VERSION ||
+                distanceMeters(entry.center, center) + radiusMeters > entry.radiusMeters) continue;
+              if (!match || entry.savedAt > match.savedAt) match = entry;
+            }
+          };
+          request.onerror = () => reject(request.error || new Error('Could not read local street-data cache.'));
+          transaction.oncomplete = () => {
+            db.close();
+            resolve(match);
+          };
+          transaction.onerror = () => {
+            db.close();
+            reject(transaction.error || new Error('Could not read local street-data cache.'));
+          };
+          transaction.onabort = () => {
+            db.close();
+            reject(transaction.error || new Error('Local street-data cache read was aborted.'));
+          };
+        }));
+      }
+      function saveStreetWaysToCache(center, radiusMeters, streetData) {
+        const id = `${STREET_CACHE_VERSION}:${center.lat.toFixed(6)}:${center.lng.toFixed(6)}:${radiusMeters}`;
+        return openStreetCache().then(db => new Promise((resolve, reject) => {
+          const transaction = db.transaction(STREET_CACHE_STORE, 'readwrite');
+          transaction.objectStore(STREET_CACHE_STORE).put({
+            id,
+            version: STREET_CACHE_VERSION,
+            center,
+            radiusMeters,
+            savedAt: Date.now(),
+            ways: streetData.ways,
+            crossings: streetData.crossings
+          });
+          transaction.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          transaction.onerror = () => {
+            db.close();
+            reject(transaction.error || new Error('Could not save street data to local cache.'));
+          };
+          transaction.onabort = () => {
+            db.close();
+            reject(transaction.error || new Error('Local street-data cache write was aborted.'));
+          };
+        }));
+      }
       async function fetchStreetWays(center, radius) {
+        const queryRadius = Math.ceil(radius + 40);
+        try {
+          const cached = await findCachedStreetWays(center, queryRadius);
+          if (cached) return { ways: cached.ways, crossings: cached.crossings, fromCache: true };
+        } catch (error) {
+          console.warn('Street Pac: could not read local street-data cache; fetching from Overpass:', error);
+        }
         // The response includes tags and geometry; qt improves output ordering on larger results.
-        const query = `[out:json][timeout:15];(way(around:${Math.ceil(radius + 40)},${center.lat.toFixed(6)},${center.lng.toFixed(6)})["highway"~"${HIGHWAY_RE}"];node(around:${Math.ceil(radius + 40)},${center.lat.toFixed(6)},${center.lng.toFixed(6)})["highway"="crossing"];);out tags geom qt;`;
+        const query = `[out:json][timeout:15];(way(around:${queryRadius},${center.lat.toFixed(6)},${center.lng.toFixed(6)})["highway"~"${HIGHWAY_RE}"];node(around:${queryRadius},${center.lat.toFixed(6)},${center.lng.toFixed(6)})["highway"="crossing"];);out tags geom qt;`;
         const failures = [];
         for (const endpoint of OVERPASS_ENDPOINTS) {
           const controller = new AbortController();
@@ -1479,7 +1568,13 @@
             const crossings = elements.filter(el => el.type === 'node' && el.tags?.highway === 'crossing' && Number.isFinite(el.lat) && Number.isFinite(el.lon))
               .map(el => ({ lat: el.lat, lng: el.lon, key: `crossing-${el.id}` }));
             if (!ways.length) throw new Error('No walkable streets were found nearby.');
-            return { ways, crossings };
+            const streetData = { ways, crossings };
+            try {
+              await saveStreetWaysToCache(center, queryRadius, streetData);
+            } catch (error) {
+              console.warn('Street Pac: could not save street data to local cache:', error);
+            }
+            return { ...streetData, fromCache: false };
           } catch (error) {
             const reason = error?.name === 'AbortError' ? 'request timed out' : (error?.message || 'network error');
             failures.push(`${new URL(endpoint).hostname}: ${reason}`);
@@ -1995,7 +2090,8 @@
           updateHeadingVisuals(lastGoodFix || startCenter);
           updateJaywalkWarning(lastGoodFix || startCenter);
           updateCoinGuide(lastGoodFix || startCenter);
-          setStatus(`Quest live: ${coins.length} coins and ${ghostActors.length} ghosts. Coins are placed on mapped walking paths/sidewalks only. Eyes up while walking!`, 'live');
+          const cacheNote = streetData.fromCache ? ' Using local map data (up to 3 months old).' : '';
+          setStatus(`Quest live: ${coins.length} coins and ${ghostActors.length} ghosts. Coins are placed on mapped walking paths/sidewalks only. Eyes up while walking!${cacheNote}`, 'live');
           if (intersections.length === 0) showBanner('Safety note: no intersections mapped', 'Street data did not identify intersections in this area. Never rely on auto-pause; stop and look up at every road crossing.', '⚠️');
           updateStats();
           requestWakeLock();
