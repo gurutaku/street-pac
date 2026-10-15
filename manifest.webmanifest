@@ -2,13 +2,13 @@
   "id": "./",
   "name": "Street Pac — GPS Walking Quest",
   "short_name": "Street Pac",
-  "description": "A playful GPS walking game: collect street coins, avoid cute ghosts, and get outdoors.",
+  "description": "A spooky GPS walking game: collect street coins, avoid friendly ghosts, and get outdoors.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#0a1020",
-  "theme_color": "#10172a",
+  "background_color": "#160f24",
+  "theme_color": "#160f24",
   "icons": [
     { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ]

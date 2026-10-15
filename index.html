@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#10172a">
+  <meta name="theme-color" content="#160f24">
   <meta name="description"
     content="A playful GPS walking game. Collect street coins and avoid cute ghosts while getting outdoors.">
   <meta name="mobile-web-app-capable" content="yes">
@@ -18,15 +18,15 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg: #0a1020;
-      --panel: rgba(18, 27, 49, .96);
-      --panel-2: #1a2745;
-      --text: #f5f7ff;
-      --muted: #acbad6;
-      --yellow: #ffd447;
+      --bg: #160f24;
+      --panel: rgba(31, 22, 48, .97);
+      --panel-2: #39284f;
+      --text: #fff8ed;
+      --muted: #c4b5d5;
+      --yellow: #ffb13b;
       --mint: #57e2bd;
-      --pink: #ff6caa;
-      --line: rgba(255, 255, 255, .12);
+      --pink: #ff7185;
+      --line: rgba(231, 207, 255, .16);
       --safe-bottom: env(safe-area-inset-bottom, 0px);
     }
 
@@ -76,7 +76,7 @@
       justify-content: space-between;
       gap: 12px;
       padding: 10px 14px;
-      background: rgba(10, 16, 32, .96);
+      background: rgba(22, 15, 36, .97);
       border-bottom: 1px solid var(--line);
     }
 
@@ -93,7 +93,7 @@
       width: 42px;
       height: 42px;
       flex: none;
-      background: #ffdc4b;
+      background: linear-gradient(145deg, #ffd166, #f97316);
       border-radius: 14px;
       color: #182038;
       font-size: 25px;
@@ -116,7 +116,7 @@
     .pill {
       font-size: 11px;
       font-weight: 800;
-      color: #15203a;
+      color: #2b1737;
       background: var(--mint);
       padding: 7px 10px;
       border-radius: 999px;
@@ -149,7 +149,7 @@
       padding: 7px 13px 7px 8px;
       border: 1px solid #ffd447b8;
       border-radius: 999px;
-      background: rgba(7, 12, 24, .97);
+      background: rgba(24, 15, 37, .98);
       box-shadow: 0 5px 18px #0008;
       pointer-events: none;
     }
@@ -199,7 +199,7 @@
     .stat {
       min-width: 0;
       border: 1px solid rgba(255, 255, 255, .13);
-      background: rgba(13, 21, 40, .94);
+      background: rgba(29, 21, 44, .95);
       backdrop-filter: blur(10px);
       border-radius: 15px;
       padding: 9px 10px;
@@ -228,34 +228,34 @@
       flex: 1;
       min-height: 0;
       width: 100%;
-      background: #17243a;
+      background: #211a2d;
     }
 
     .leaflet-container {
       font-family: inherit;
-      background: #17243a;
+      background: #211a2d;
       touch-action: none;
     }
 
     .leaflet-control-attribution {
       font-size: 10px !important;
-      background: rgba(10, 16, 32, .78) !important;
-      color: #d3dcf3 !important;
+      background: rgba(22, 15, 36, .84) !important;
+      color: #f1e7fa !important;
     }
 
     .leaflet-control-attribution a {
-      color: #b7d9ff !important;
+      color: #ffc979 !important;
     }
 
     .leaflet-control-zoom a {
-      background: #121b31 !important;
+      background: #281b3b !important;
       color: white !important;
-      border-color: #3b4965 !important;
+      border-color: #604777 !important;
     }
 
     .bottom-dock {
       z-index: 700;
-      background: linear-gradient(180deg, rgba(10, 16, 32, .96), #0a1020);
+      background: linear-gradient(180deg, rgba(29, 21, 44, .98), #160f24);
       border-top: 1px solid var(--line);
       padding: 10px 12px calc(10px + var(--safe-bottom));
     }
@@ -318,13 +318,13 @@
 
     .btn-secondary {
       color: var(--text);
-      background: #233251;
+      background: #39284f;
       border: 1px solid rgba(255, 255, 255, .11);
     }
 
     .btn-danger {
       color: white;
-      background: #b63054;
+      background: #b93855;
     }
 
     .btn-small {
@@ -353,7 +353,7 @@
       padding: 0;
       border: 1px solid rgba(255, 255, 255, .14);
       border-radius: 24px;
-      background: rgba(13, 21, 40, .99);
+      background: rgba(29, 21, 44, .99);
       box-shadow: 0 20px 70px #0007;
     }
 
@@ -377,7 +377,7 @@
       flex: 0 0 auto;
       padding: 10px 16px 12px;
       padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-      background: #0d1528;
+      background: #21172f;
       border-top: 1px solid rgba(255, 255, 255, .1);
       box-shadow: 0 -8px 18px rgba(0, 0, 0, .18);
     }
@@ -410,7 +410,7 @@
 
     .field-label {
       display: block;
-      color: #dce4f8;
+      color: #eee1fa;
       font-weight: 800;
       font-size: 12px;
       margin: 14px 0 8px;
@@ -447,13 +447,13 @@
       min-height: 47px;
       border-radius: 13px;
       border: 1px solid var(--line);
-      background: #192743;
+      background: #2c203e;
       font-size: 25px;
     }
 
     .character[aria-pressed="true"] {
       border: 2px solid var(--yellow);
-      background: #433d27;
+      background: #51361f;
       box-shadow: 0 0 0 2px #ffd44721;
     }
 
@@ -606,7 +606,7 @@
       width: min(100%, 420px);
       padding: 24px;
       border-radius: 27px;
-      background: #111c33;
+      background: #21172f;
       border: 1px solid var(--line);
       box-shadow: 0 25px 90px #0007;
       text-align: center;
@@ -638,7 +638,7 @@
     .summary-metric {
       padding: 15px 8px;
       border-radius: 17px;
-      background: #1b2a49;
+      background: #30213f;
     }
 
     .summary-metric strong {
@@ -1037,7 +1037,7 @@
         <div class="brand-mark">🟡</div>
         <div>
           <div class="brand-title">Street Pac</div>
-          <div class="brand-sub">A real-world coin quest</div>
+          <div class="brand-sub">A spooky real-world coin quest</div>
         </div>
       </div>
       <div class="pill" id="modePill">READY TO ROAM</div>
@@ -1045,14 +1045,14 @@
     <div id="map" aria-label="Street map for the walking game"></div>
     <div id="coinCollectEffect" class="coin-collect-effect hidden" aria-hidden="true">
       <div class="coin-collect-content">
-        <span class="coin-collect-icon">🪙</span>
+        <span class="coin-collect-icon">🟡</span>
         <span id="coinCollectText">COIN COLLECTED!</span>
       </div>
     </div>
     <div class="stats" aria-live="polite">
       <div class="stat">
         <div class="stat-label">Coins</div>
-        <div class="stat-value" id="coinStat">🪙 0</div>
+        <div class="stat-value" id="coinStat">🟡 0</div>
       </div>
       <div class="stat">
         <div class="stat-label">Distance</div>
@@ -1080,10 +1080,10 @@
     </div>
     <section id="welcome" class="welcome" aria-label="Game setup">
       <div class="welcome-scroll">
-        <div class="eyebrow">Walk • Explore • Collect</div>
-        <h1>Your streets.<br>Your arcade.</h1>
+        <div class="eyebrow">🎃 Trick • Treat • Explore 🦇</div>
+        <h1>Your spooky<br>street quest.</h1>
         <p class="welcome-copy">Head outside, follow your GPS marker, collect golden coins on nearby streets, and watch
-          out for wandering ghosts.</p>
+          out for friendly wandering ghosts.</p>
         <label class="field-label" for="radiusRange">Coin zone radius</label>
         <div class="radius-line"><input id="radiusRange" type="range" min="1" max="3" step="0.5" value="1.5"
             aria-label="Coin zone radius in kilometres">
@@ -1309,7 +1309,7 @@
         return L.divIcon({ className: 'player-icon', html: `<div class="player-marker"${headingStyle}><div class="${coneClass}"></div><div class="player">${selectedCharacter}</div></div>`, iconSize: [44, 44], iconAnchor: [22, 22] });
       }
       function coinIcon() {
-        return L.divIcon({ className: 'coin-icon', html: '<div class="coin">🪙</div>', iconSize: [28, 28], iconAnchor: [14, 14] });
+        return L.divIcon({ className: 'coin-icon', html: '<div class="coin">🟡</div>', iconSize: [28, 28], iconAnchor: [14, 14] });
       }
       function ghostIcon(emoji) {
         return L.divIcon({ className: 'ghost-icon', html: `<div class="ghost">${emoji}</div>`, iconSize: [35, 35], iconAnchor: [17, 17] });
@@ -1374,7 +1374,7 @@
         }
       }
       function updateStats() {
-        $('coinStat').textContent = `🪙 ${coinsCollected}`;
+        $('coinStat').textContent = `🟡 ${coinsCollected}`;
         $('distanceStat').textContent = fmtDistance(distanceTravelledM);
         if (gameStartedAt) $('timeStat').textContent = fmtTime(GAME_DURATION_MS - (Date.now() - gameStartedAt));
       }
@@ -1794,7 +1794,7 @@
           const next = graph.nodes.get(options[Math.floor(Math.random() * options.length)]);
           const emoji = GHOST_EMOJIS[i % GHOST_EMOJIS.length];
           const marker = L.marker([node.lat, node.lng], { icon: ghostIcon(emoji), interactive: false, keyboard: false, zIndexOffset: 300 }).addTo(map);
-          ghostActors.push({ marker, emoji, from: node.key, to: next.key, progress: 0, speed: rand(1.1, 1.9), previous: null, lat: node.lat, lng: node.lng, lastEncounter: 0 });
+          ghostActors.push({ marker, emoji, from: node.key, to: next.key, progress: 0, speed: rand(2.2, 3.8), previous: null, lat: node.lat, lng: node.lng, lastEncounter: 0 });
         }
       }
       function nextGhostNode(actor, currentKey) {
@@ -2052,10 +2052,10 @@
           const position = await getCurrentPosition();
           startCenter = { lat: position.coords.latitude, lng: position.coords.longitude };
           if (position.coords.accuracy > 100) {
-            map.setView([startCenter.lat, startCenter.lng], 16);
+            map.setView([startCenter.lat, startCenter.lng], 17);
             throw new Error(`Your current GPS accuracy is about ${Math.round(position.coords.accuracy)} m. Move to a more open outdoor area, then try again.`);
           }
-          map.setView([startCenter.lat, startCenter.lng], radiusKm <= 1 ? 16 : 15);
+          map.setView([startCenter.lat, startCenter.lng], radiusKm <= 1 ? 17 : 16);
           clearActors();
           startCircle = L.circle([startCenter.lat, startCenter.lng], { radius: radiusMeters(), color: '#ffd447', weight: 2, opacity: .85, fillColor: '#ffd447', fillOpacity: .035, dashArray: '7 8', interactive: false }).addTo(map);
           lastGoodFix = { lat: startCenter.lat, lng: startCenter.lng, accuracy: position.coords.accuracy, timestamp: position.timestamp };
@@ -2155,7 +2155,7 @@
         $('startButton').textContent = '▶ START GAME';
         $('startError').classList.add('hidden'); $('startError').textContent = '';
         $('stopButton').disabled = true; $('centerButton').disabled = true;
-        $('coinStat').textContent = '🪙 0'; $('distanceStat').textContent = '0.00 km'; $('timeStat').textContent = '10:00';
+        $('coinStat').textContent = '🟡 0'; $('distanceStat').textContent = '0.00 km'; $('timeStat').textContent = '10:00';
         setPhase('ready'); map.setView([20, 0], 2);
       }
 
