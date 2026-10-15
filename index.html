@@ -1364,7 +1364,7 @@
         const angle = heading === null || !nearest.closest
           ? null
           : Math.abs(((bearingDegrees(p, nearest.closest) - heading + 540) % 360) - 180);
-        const shouldWarn = angle !== null && angle >= 60 && angle <= 120;
+        const shouldWarn = angle !== null && nearest.distance > INTERSECTION_PAUSE_M && angle >= 60 && angle <= 120;
         if (shouldWarn && !jaywalkWarningActive) {
           showBanner('Please do not jaywalk!', 'The nearest mapped intersection is behind your current heading. Turn toward it and cross only at a safe, legal crossing. Heading and map data may be inaccurate.', '🚦', 'critical');
         } else if (!shouldWarn && jaywalkWarningActive) {
@@ -1887,7 +1887,7 @@
         const now = Date.now();
         if (now - lastCoinEncounterAt < 5000) return;
         for (const ghost of ghostActors) {
-          if (distanceMeters(lastGoodFix, { lat: ghost.lat, lng: ghost.lng }) <= 12 && now - ghost.lastEncounter > 25000) {
+          if (distanceMeters(lastGoodFix, { lat: ghost.lat, lng: ghost.lng }) <= 30 && now - ghost.lastEncounter > 25000) {
             ghostEncounters++;
             ghost.lastEncounter = now;
             lastCoinEncounterAt = now;
