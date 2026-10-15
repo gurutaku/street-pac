@@ -1171,13 +1171,13 @@
       const COIN_PICKUP_BUFFER_M = 30;
       const COIN_PICKUP_GPS_BUFFER_MAX_M = 10;
       const INTERSECTION_PAUSE_M = 10;
-      const INTERSECTION_RESUME_M = 5;
+      const INTERSECTION_RESUME_M = 0;
       const STREET_CACHE_DB = 'street-pac-map-cache';
       const STREET_CACHE_STORE = 'street-data';
       const STREET_CACHE_VERSION = 1;
       const STREET_CACHE_MAX_AGE_MONTHS = 3;
       const STREET_CACHE_REUSE_MARGIN_M = 100;
-      const COIN_INTERSECTION_CLEARANCE_M = INTERSECTION_PAUSE_M + 5;
+      const COIN_INTERSECTION_CLEARANCE_M = INTERSECTION_PAUSE_M + 10;
       const COIN_WALKWAY_HIGHWAYS = new Set(['footway', 'path', 'pedestrian', 'steps']);
       const VEHICLE_ROAD_HIGHWAYS = new Set(['primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'unclassified', 'residential', 'living_street', 'service', 'track', 'road']);
       // Include walkways and local/arterial street geometry so unsafe mid-block crossing can be estimated.
@@ -1353,7 +1353,12 @@
         $('safetyBanner').classList.remove('safety-critical');
       }
       function updateJaywalkWarning(p) {
-        if (phase !== 'playing') return;
+        const banner = $('safetyBanner');
+        if (phase !== 'playing' ||
+          (!banner.classList.contains('hidden') && $('bannerTitle').textContent === 'STOP — INTERSECTION SAFETY PAUSE')) {
+          jaywalkWarningActive = false;
+          return;
+        }
         const heading = activeHeading();
         const nearest = findNearbyIntersection(p);
         const angle = heading === null || !nearest.closest
