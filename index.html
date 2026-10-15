@@ -1171,7 +1171,7 @@
       const COIN_PICKUP_BUFFER_M = 30;
       const COIN_PICKUP_GPS_BUFFER_MAX_M = 10;
       const INTERSECTION_PAUSE_M = 10;
-      const INTERSECTION_RESUME_M = 0;
+      const INTERSECTION_RESUME_M = 20;
       const STREET_CACHE_DB = 'street-pac-map-cache';
       const STREET_CACHE_STORE = 'street-data';
       const STREET_CACHE_VERSION = 1;
@@ -1959,6 +1959,11 @@
       function changePauseState(p, accurate) {
         if (!['playing', 'paused-intersection', 'paused-location'].includes(phase)) return;
         if (!accurate) {
+          if (intersectionWasPaused || phase === 'paused-intersection') {
+            intersectionWasPaused = true;
+            goodFixCount = 0;
+            return;
+          }
           locationPause = true;
           goodFixCount = 0;
           if (phase !== 'paused-location') setPhase('paused-location');
@@ -2020,7 +2025,9 @@
         const fresh = Date.now() - position.timestamp <= 12000;
         const accurate = accuracy <= MAX_ACCURACY_M && fresh;
         if (!accurate) {
-          setStatus(`GPS accuracy is about ${Math.round(accuracy)} m; waiting for a better fix.`, 'warn');
+          if (!intersectionWasPaused && phase !== 'paused-intersection') {
+            setStatus(`GPS accuracy is about ${Math.round(accuracy)} m; waiting for a better fix.`, 'warn');
+          }
           changePauseState(p, false);
           return;
         }
@@ -2031,7 +2038,9 @@
           if (jump / deltaSeconds > MAX_WALK_SPEED_MPS && jump > 25) impossibleJump = true;
         }
         if (impossibleJump) {
-          setStatus('A sudden GPS jump was ignored. Waiting for stable location.', 'warn');
+          if (!intersectionWasPaused && phase !== 'paused-intersection') {
+            setStatus('A sudden GPS jump was ignored. Waiting for stable location.', 'warn');
+          }
           changePauseState(p, false);
           return;
         }
