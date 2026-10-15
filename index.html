@@ -1880,10 +1880,10 @@
           $('coinGuideText').textContent = 'All coins collected — great job!';
           return;
         }
-        const { coin: nearest, distance: nearestDistance } = getNearestSafeCoin(p);
+        const { coin: nearest, distance: nearestDistance } = getNearestCoin(p);
         if (!nearest) {
           $('coinArrow').style.display = 'none';
-          $('coinGuideText').textContent = 'No safe direct direction. Follow mapped sidewalks to a marked crossing.';
+          $('coinGuideText').textContent = 'No coins available.';
           return;
         }
         $('coinArrow').style.display = 'grid';
@@ -1935,12 +1935,12 @@
         }
         if (phase !== 'playing') setPhase('playing');
       }
-      function getNearestSafeCoin(p) {
+      function getNearestCoin(p) {
         let nearest = null, nearestDistance = Infinity;
         for (const coin of coins) {
           if (coin.collected) continue;
           const d = distanceMeters(p, coin);
-          if (d < nearestDistance && hasSafeDirectCoinApproach(p, coin)) {
+          if (d < nearestDistance) {
             nearest = coin;
             nearestDistance = d;
           }
@@ -1951,7 +1951,7 @@
         if (phase !== 'playing' || jaywalkWarningActive) return;
         const gpsBuffer = Number.isFinite(accuracy) ? Math.min(COIN_PICKUP_GPS_BUFFER_MAX_M, Math.max(0, accuracy)) : 0;
         const pickupRadius = COIN_PICKUP_BUFFER_M + gpsBuffer;
-        const target = getNearestSafeCoin(p);
+        const target = getNearestCoin(p);
         if (target.coin && target.distance <= pickupRadius) {
           target.coin.collected = true;
           map.removeLayer(target.coin.marker);
