@@ -435,6 +435,17 @@
       color: var(--yellow);
     }
 
+    .duration-select {
+      width: 100%;
+      min-height: 42px;
+      padding: 9px 12px;
+      border: 1px solid #79528f;
+      border-radius: 12px;
+      color: var(--text);
+      background: #2c203e;
+      font-weight: 800;
+    }
+
     .characters {
       display: grid;
       grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -1066,8 +1077,8 @@
     <div id="coinGuide" class="coin-guide hidden" aria-live="polite">
       <div id="coinArrow" class="coin-guide-arrow" aria-hidden="true">↑</div>
       <div class="coin-guide-copy">
-        <div class="coin-guide-title">Nearest safe coin</div>
-        <div id="coinGuideText">Finding a safe walking route…</div>
+        <div class="coin-guide-title">Nearest coin</div>
+        <div id="coinGuideText">Finding a coin…</div>
       </div>
     </div>
     <div id="safetyBanner" class="banner hidden" role="status">
@@ -1088,6 +1099,15 @@
             aria-label="Coin zone radius in kilometres">
           <div class="radius-value" id="radiusValue">1.5 km</div>
         </div>
+        <label class="field-label" for="durationSelect">Game countdown</label>
+        <select id="durationSelect" class="duration-select">
+          <option value="10" selected>10 minutes</option>
+          <option value="20">20 minutes</option>
+          <option value="30">30 minutes</option>
+          <option value="40">40 minutes</option>
+          <option value="50">50 minutes</option>
+          <option value="60">60 minutes</option>
+        </select>
         <div class="field-label">Choose your character</div>
         <div class="characters" id="characters" role="group" aria-label="Choose your player character">
           <button class="character" type="button" data-character="🧙‍♂️" aria-label="Wizard" aria-pressed="true">🧙‍♂️</button>
@@ -1139,7 +1159,8 @@
   <script>
     (() => {
       'use strict';
-      const GAME_DURATION_MS = 10 * 60 * 1000;
+      let gameDurationMinutes = 10;
+      let gameDurationMs = gameDurationMinutes * 60 * 1000;
       const MAX_ACCURACY_M = 40;
       const MAX_WALK_SPEED_MPS = 8;
       const MIN_DISTANCE_STEP_M = 3;
@@ -1375,7 +1396,7 @@
       function updateStats() {
         $('coinStat').textContent = `🟡 ${coinsCollected}`;
         $('distanceStat').textContent = fmtDistance(distanceTravelledM);
-        if (gameStartedAt) $('timeStat').textContent = fmtTime(GAME_DURATION_MS - (Date.now() - gameStartedAt));
+        if (gameStartedAt) $('timeStat').textContent = fmtTime(gameDurationMs - (Date.now() - gameStartedAt));
       }
       function showCoinCollectionEffect(count) {
         if (phase !== 'playing' || jaywalkWarningActive || $('safetyBanner').classList.contains('safety-critical')) return;
@@ -2105,7 +2126,7 @@
           gameInterval = setInterval(() => {
             const elapsed = Date.now() - gameStartedAt;
             updateStats();
-            if (elapsed >= GAME_DURATION_MS) endGame('time');
+            if (elapsed >= gameDurationMs) endGame('time');
           }, 250);
         } catch (error) {
           appLocationError = error.message || 'Could not start the game.';
@@ -2125,7 +2146,7 @@
       }
       function endGame(reason = 'ended') {
         if (phase === 'ended' || phase === 'ready') return;
-        const elapsed = gameStartedAt ? Math.min(GAME_DURATION_MS, Date.now() - gameStartedAt) : 0;
+        const elapsed = gameStartedAt ? Math.min(gameDurationMs, Date.now() - gameStartedAt) : 0;
         setPhase('ended');
         stopTracking();
         $('stopButton').disabled = true;
@@ -2133,7 +2154,7 @@
         $('summaryEmoji').textContent = reason === 'time' ? '🏆' : '🎉';
         $('summaryTitle').textContent = reason === 'time' ? 'Time’s up!' : 'Quest complete!';
         $('summarySubtitle').textContent = reason === 'time'
-          ? 'Ten minutes of movement — great job getting outside.'
+          ? `${gameDurationMinutes} minutes of movement — great job getting outside.`
           : 'Nice work getting outside. Every step counts.';
         $('summaryFineprint').textContent = 'Distance is estimated from filtered phone location samples. Intersection safety pauses are best-effort only; always obey traffic rules and stay aware of your surroundings.';
         $('summaryCoins').textContent = String(coinsCollected);
@@ -2154,13 +2175,18 @@
         $('startButton').textContent = '▶ START GAME';
         $('startError').classList.add('hidden'); $('startError').textContent = '';
         $('stopButton').disabled = true; $('centerButton').disabled = true;
-        $('coinStat').textContent = '🟡 0'; $('distanceStat').textContent = '0.00 km'; $('timeStat').textContent = '10:00';
+        $('coinStat').textContent = '🟡 0'; $('distanceStat').textContent = '0.00 km'; $('timeStat').textContent = fmtTime(gameDurationMs);
         setPhase('ready'); map.setView([20, 0], 2);
       }
 
       $('radiusRange').addEventListener('input', e => {
         radiusKm = Number(e.target.value);
         $('radiusValue').textContent = `${radiusKm.toFixed(1)} km`;
+      });
+      $('durationSelect').addEventListener('change', e => {
+        gameDurationMinutes = Number(e.target.value);
+        gameDurationMs = gameDurationMinutes * 60 * 1000;
+        $('timeStat').textContent = fmtTime(gameDurationMs);
       });
       $('characters').addEventListener('click', e => {
         const btn = e.target.closest('button[data-character]');
