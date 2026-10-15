@@ -2173,8 +2173,10 @@
       $('startButton').addEventListener('click', startGame);
       $('stopButton').addEventListener('click', () => endGame('manual'));
       $('centerButton').addEventListener('click', () => {
-        if (lastGoodFix) map.panTo([lastGoodFix.lat, lastGoodFix.lng], { animate: true, duration: .5 });
-        else if (startCenter) map.panTo([startCenter.lat, startCenter.lng], { animate: true, duration: .5 });
+        const target = playerMarker ? playerMarker.getLatLng() : (lastGoodFix || startCenter);
+        if (!target) return;
+        map.stop();
+        map.setView(target, map.getZoom(), { animate: false });
       });
       $('againButton').addEventListener('click', resetToReady);
 
