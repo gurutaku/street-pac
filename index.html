@@ -586,29 +586,6 @@
       font-weight: 800;
     }
 
-    .summary-card.summary-danger {
-      border: 6px solid #ff263f;
-      border-radius: 8px;
-      background: #030303;
-      box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .96);
-    }
-
-    .summary-card.summary-danger .summary-emoji {
-      color: #ff263f;
-    }
-
-    .summary-card.summary-danger h2 {
-      color: #ff263f;
-      font-size: clamp(26px, 7vw, 36px);
-      line-height: 1.04;
-      text-transform: uppercase;
-    }
-
-    .summary-card.summary-danger p {
-      color: #fff;
-      line-height: 1.45;
-    }
-
     .summary {
       z-index: 800;
       position: absolute;
@@ -1155,8 +1132,7 @@
       </div>
       <button id="againButton" class="btn btn-primary wide" type="button">↻ Play again</button>
       <p class="fineprint" id="summaryFineprint">Distance is estimated from filtered phone location samples.
-        Intersection and unsafe-crossing detection are best-effort only; always obey traffic rules and stay aware of
-        your surroundings.</p>
+        Intersection safety pauses are best-effort only; always obey traffic rules and stay aware of your surroundings.</p>
     </div>
   </div>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -1171,7 +1147,7 @@
       const COIN_PICKUP_BUFFER_M = 30;
       const COIN_PICKUP_GPS_BUFFER_MAX_M = 10;
       const INTERSECTION_PAUSE_M = 10;
-      const INTERSECTION_RESUME_M = 20;
+      const INTERSECTION_RESUME_M = 10;
       const STREET_CACHE_DB = 'street-pac-map-cache';
       const STREET_CACHE_STORE = 'street-data';
       const STREET_CACHE_VERSION = 1;
@@ -1277,7 +1253,6 @@
       let lastGhostTick = 0;
       let lastCoinEncounterAt = 0;
       let ignoreNextFixForDistance = false;
-      let sessionEndReason = 'ended';
       let appLocationError = '';
 
       function setStatus(text, kind = '') {
@@ -1776,31 +1751,6 @@
         if (t < minT || t > 1 - minT || u < -0.02 || u > 1.02) return null;
         return interpolate(a, b, t);
       }
-      function detectedUnsafeRoadCrossing(previous, current) {
-        if (!previous || previous.accuracy > 20 || current.accuracy > 20) return null;
-        const travel = distanceMeters(previous, current);
-        if (travel < 3 || travel > 45 || !crossingRoadSegments.length) return null;
-        const moveBearing = bearingDegrees(previous, current);
-        const minLat = Math.min(previous.lat, current.lat), maxLat = Math.max(previous.lat, current.lat);
-        const minLng = Math.min(previous.lng, current.lng), maxLng = Math.max(previous.lng, current.lng);
-        // Small bounding expansion tolerates minor GPS error without treating parallel walking as a crossing.
-        const latPad = 0.000025, lngPad = 0.00003;
-        for (const seg of crossingRoadSegments) {
-          if (Math.max(seg.a.lat, seg.b.lat) < minLat - latPad || Math.min(seg.a.lat, seg.b.lat) > maxLat + latPad) continue;
-          if (Math.max(seg.a.lng, seg.b.lng) < minLng - lngPad || Math.min(seg.a.lng, seg.b.lng) > maxLng + lngPad) continue;
-          const roadBearing = bearingDegrees(seg.a, seg.b);
-          const rawAngle = ((moveBearing - roadBearing) % 180 + 180) % 180;
-          const crossingAngle = Math.min(rawAngle, 180 - rawAngle);
-          if (crossingAngle < 28) continue; // Ignore movement roughly parallel to a road.
-          const crossing = segmentCrossingPoint(previous, current, seg.a, seg.b);
-          if (!crossing) continue;
-          // An OSM junction or marked pedestrian crossing is a permitted crossing zone.
-          const nearestLegalCrossing = nearestIntersectionDistance(crossing, intersections);
-          if (nearestLegalCrossing <= INTERSECTION_PAUSE_M + 8) continue;
-          return crossing;
-        }
-        return null;
-      }
       function hasSafeDirectCoinApproach(from, coin) {
         // The pointer must not tell the player to walk directly across a vehicle road mid-block.
         if (!crossingRoadSegments.length) return false;
@@ -2051,13 +2001,6 @@
             courseHeadingDeg = bearingDegrees(previousFix, p);
             courseHeadingAt = Date.now();
           }
-          if (['playing', 'paused-intersection'].includes(phase)) {
-            const unsafeCrossing = detectedUnsafeRoadCrossing(previousFix, { ...p, accuracy });
-            if (unsafeCrossing) {
-              endGame('unsafe-crossing');
-              return;
-            }
-          }
         }
         lastGoodFix = { ...p, accuracy, timestamp: position.timestamp };
         updateHeadingVisuals(lastGoodFix);
@@ -2183,22 +2126,17 @@
       }
       function endGame(reason = 'ended') {
         if (phase === 'ended' || phase === 'ready') return;
-        sessionEndReason = reason;
         const elapsed = gameStartedAt ? Math.min(GAME_DURATION_MS, Date.now() - gameStartedAt) : 0;
         setPhase('ended');
         stopTracking();
         $('stopButton').disabled = true;
         $('centerButton').disabled = true;
-        const unsafeCrossing = reason === 'unsafe-crossing';
-        $('summaryCard').classList.toggle('summary-danger', unsafeCrossing);
-        $('summaryEmoji').textContent = unsafeCrossing ? '🚨' : (reason === 'time' ? '🏆' : '🎉');
-        $('summaryTitle').textContent = unsafeCrossing ? 'Unsafe crossing detected' : (reason === 'time' ? 'Time’s up!' : 'Quest complete!');
-        $('summarySubtitle').textContent = unsafeCrossing
-          ? 'The game ended because your GPS path appears to cross a mapped vehicle road away from a mapped intersection or marked crossing. Stop, look up, and cross only at a safe legal crossing.'
-          : (reason === 'time' ? 'Ten minutes of movement — great job getting outside.' : 'Nice work getting outside. Every step counts.');
-        $('summaryFineprint').textContent = unsafeCrossing
-          ? 'This alert is a best-effort estimate, not proof: GPS and map data can be inaccurate or incomplete. The game cannot reliably detect every unsafe crossing. Always obey traffic laws and use safe crossings.'
-          : 'Distance is estimated from filtered phone location samples. Intersection and unsafe-crossing detection are best-effort only; always obey traffic rules and stay aware of your surroundings.';
+        $('summaryEmoji').textContent = reason === 'time' ? '🏆' : '🎉';
+        $('summaryTitle').textContent = reason === 'time' ? 'Time’s up!' : 'Quest complete!';
+        $('summarySubtitle').textContent = reason === 'time'
+          ? 'Ten minutes of movement — great job getting outside.'
+          : 'Nice work getting outside. Every step counts.';
+        $('summaryFineprint').textContent = 'Distance is estimated from filtered phone location samples. Intersection safety pauses are best-effort only; always obey traffic rules and stay aware of your surroundings.';
         $('summaryCoins').textContent = String(coinsCollected);
         $('summaryDistance').textContent = fmtDistance(distanceTravelledM);
         $('summaryTime').textContent = fmtTime(elapsed);
