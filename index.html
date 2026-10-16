@@ -1178,8 +1178,9 @@
       const VEHICLE_ROAD_HIGHWAYS = new Set(['primary', 'primary_link', 'secondary', 'secondary_link', 'tertiary', 'tertiary_link', 'unclassified', 'residential', 'living_street', 'service', 'track', 'road']);
       // Include walkways and local/arterial street geometry so unsafe mid-block crossing can be estimated.
       const HIGHWAY_RE = '^(primary|primary_link|secondary|secondary_link|tertiary|tertiary_link|residential|living_street|unclassified|footway|path|pedestrian|cycleway|steps|service|track|bridleway|road)$';
-      // Public Overpass instances are community-operated and can be busy. Try independent instances.
+      // Prefer the Street Pac instance; use public instances only when it fails.
       const OVERPASS_ENDPOINTS = [
+        'https://overpass.gurutaku.ca/api/interpreter',
         'https://overpass-api.de/api/interpreter',
         'https://overpass.private.coffee/api/interpreter',
         'https://z.overpass-api.de/api/interpreter'
