@@ -1056,14 +1056,14 @@
     <div id="map" aria-label="Street map for the walking game"></div>
     <div id="coinCollectEffect" class="coin-collect-effect hidden" aria-hidden="true">
       <div class="coin-collect-content">
-        <span class="coin-collect-icon">🟡</span>
+        <span class="coin-collect-icon">🎃</span>
         <span id="coinCollectText">COIN COLLECTED!</span>
       </div>
     </div>
     <div class="stats" aria-live="polite">
       <div class="stat">
         <div class="stat-label">Coins</div>
-        <div class="stat-value" id="coinStat">🟡 0</div>
+        <div class="stat-value" id="coinStat">🎃 0</div>
       </div>
       <div class="stat">
         <div class="stat-label">Distance</div>
@@ -1330,7 +1330,7 @@
         return L.divIcon({ className: 'player-icon', html: `<div class="player-marker"${headingStyle}><div class="${coneClass}"></div><div class="player">${selectedCharacter}</div></div>`, iconSize: [44, 44], iconAnchor: [22, 22] });
       }
       function coinIcon() {
-        return L.divIcon({ className: 'coin-icon', html: '<div class="coin">🟡</div>', iconSize: [28, 28], iconAnchor: [14, 14] });
+        return L.divIcon({ className: 'coin-icon', html: '<div class="coin">🎃</div>', iconSize: [28, 28], iconAnchor: [14, 14] });
       }
       function ghostIcon(emoji) {
         return L.divIcon({ className: 'ghost-icon', html: `<div class="ghost">${emoji}</div>`, iconSize: [35, 35], iconAnchor: [17, 17] });
@@ -1395,7 +1395,7 @@
         }
       }
       function updateStats() {
-        $('coinStat').textContent = `🟡 ${coinsCollected}`;
+        $('coinStat').textContent = `🎃 ${coinsCollected}`;
         $('distanceStat').textContent = fmtDistance(distanceTravelledM);
         if (gameStartedAt) $('timeStat').textContent = fmtTime(gameDurationMs - (Date.now() - gameStartedAt));
       }
@@ -2176,7 +2176,7 @@
         $('startButton').textContent = '▶ START GAME';
         $('startError').classList.add('hidden'); $('startError').textContent = '';
         $('stopButton').disabled = true; $('centerButton').disabled = true;
-        $('coinStat').textContent = '🟡 0'; $('distanceStat').textContent = '0.00 km'; $('timeStat').textContent = fmtTime(gameDurationMs);
+        $('coinStat').textContent = '🎃 0'; $('distanceStat').textContent = '0.00 km'; $('timeStat').textContent = fmtTime(gameDurationMs);
         setPhase('ready'); map.setView([20, 0], 2);
       }
 
